@@ -4,12 +4,14 @@ import { ScreenContainer } from "@/components/screen-container";
 import { FormInput } from "@/components/form-input";
 import { LargeButton } from "@/components/large-button";
 import { useInspection } from "@/lib/inspection-context";
+import { useCPFMask } from "@/hooks/use-cpf-mask";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
 export default function ClientDataScreen() {
   const router = useRouter();
   const { state, updateClient, updateVistoriador } = useInspection();
+  const { formatCPF } = useCPFMask();
 
   const handleNext = async () => {
     // Validar campos obrigatórios
@@ -155,6 +157,7 @@ export default function ClientDataScreen() {
               value={state.vistoriador.cpf}
               onChangeText={(text) => updateVistoriador({ cpf: text })}
               keyboardType="numeric"
+              mask={formatCPF}
               required
             />
             <FormInput

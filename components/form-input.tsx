@@ -12,6 +12,7 @@ interface FormInputProps {
   editable?: boolean;
   multiline?: boolean;
   numberOfLines?: number;
+  mask?: (text: string) => string;
 }
 
 export function FormInput({
@@ -24,7 +25,12 @@ export function FormInput({
   editable = true,
   multiline = false,
   numberOfLines = 1,
+  mask,
 }: FormInputProps) {
+  const handleChangeText = (text: string) => {
+    const formatted = mask ? mask(text) : text;
+    onChangeText(formatted);
+  };
   const colors = useColors();
 
   return (
@@ -38,7 +44,7 @@ export function FormInput({
       <TextInput
         placeholder={placeholder}
         value={value}
-        onChangeText={onChangeText}
+        onChangeText={handleChangeText}
         keyboardType={keyboardType}
         editable={editable}
         multiline={multiline}
