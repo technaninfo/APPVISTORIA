@@ -101,3 +101,15 @@
 - [x] Melhorar UX na navegação (haptics e feedback visual)
 - [x] Debugar erro ao finalizar vistoria (corrigido em storage-service)
 - [x] Gerar HTML/PDF automaticamente ao finalizar (corrigido em pdf-service)
+
+
+## Fase 11: Página de Vistoria Dinâmica (Novo)
+- [x] Criar estrutura de dados para checklist de vistoria
+- [x] Implementar página de seleção de cômodo (manual + sugestões)
+- [x] Implementar seleção de tipo de área (Interna/Externa)
+- [x] Implementar checklist expansível com testes
+- [x] Adicionar opção NA para itens inexistentes
+- [x] Implementar captura de fotos com legendas
+- [x] Permitir múltiplas fotos por teste reprovado
+- [ ] Integrar com contexto de inspeção
+- [x] Botão para adicionar novo cômodo ou encerrar vistoria
