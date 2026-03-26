@@ -1,8 +1,10 @@
 import { ScrollView, View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { FormInput } from "@/components/form-input";
 import { LargeButton } from "@/components/large-button";
+import { Toast } from "@/components/toast";
 import { useInspection } from "@/lib/inspection-context";
 import { useCPFMask } from "@/hooks/use-cpf-mask";
 import * as Haptics from "expo-haptics";
@@ -12,6 +14,7 @@ export default function ClientDataScreen() {
   const router = useRouter();
   const { state, updateClient, updateVistoriador } = useInspection();
   const { formatCPF } = useCPFMask();
+  const [showToast, setShowToast] = useState(false);
 
   const handleNext = async () => {
     // Validar campos obrigatórios
@@ -24,9 +27,7 @@ export default function ClientDataScreen() {
       !state.vistoriador.name ||
       !state.vistoriador.cpf ||
       !state.vistoriador.email ||
-      !state.vistoriador.phone ||
-      !state.vistoriador.address.street ||
-      !state.vistoriador.address.number
+      !state.vistoriador.phone
     ) {
       if (Platform.OS !== "web") {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -34,19 +35,31 @@ export default function ClientDataScreen() {
       return;
     }
 
-    if (state.type === "technical" && (!state.vistoriador.crea || !state.vistoriador.cau)) {
+    // Para vistoria técnica, exigir CREA OU CAU (não ambos)
+    if (state.type === "technical" && !state.vistoriador.crea && !state.vistoriador.cau) {
       if (Platform.OS !== "web") {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
       return;
     }
 
-    router.push("../inspection/conditions");
+    if (Platform.OS !== "web") {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setShowToast(true);
+    setTimeout(() => {
+      router.push("../inspection/conditions");
+    }, 500);
   };
 
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }} 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+      >
         <View className="gap-6 pb-6">
           {/* Header */}
           <View className="gap-2">
@@ -165,7 +178,6 @@ export default function ClientDataScreen() {
               placeholder="Ex: Rua das Flores"
               value={state.vistoriador.address.street}
               onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, street: text } })}
-              required
             />
             <View className="flex-row gap-3">
               <View className="flex-1">
@@ -175,7 +187,6 @@ export default function ClientDataScreen() {
                   value={state.vistoriador.address.number}
                   onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, number: text } })}
                   keyboardType="numeric"
-                  required
                 />
               </View>
               <View className="flex-1">
@@ -242,18 +253,16 @@ export default function ClientDataScreen() {
             <View className="gap-4">
               <Text className="text-lg font-semibold text-foreground">Dados Técnicos</Text>
               <FormInput
-                label="CREA"
+                label="CREA (ou deixe em branco se tiver CAU)"
                 placeholder="Ex: 12345/D-SP"
                 value={state.vistoriador.crea || ""}
                 onChangeText={(text) => updateVistoriador({ crea: text })}
-                required
               />
               <FormInput
-                label="CAU"
+                label="CAU (ou deixe em branco se tiver CREA)"
                 placeholder="Ex: 123456"
                 value={state.vistoriador.cau || ""}
                 onChangeText={(text) => updateVistoriador({ cau: text })}
-                required
               />
             </View>
           )}
@@ -267,6 +276,12 @@ export default function ClientDataScreen() {
           </View>
         </View>
       </ScrollView>
+      <Toast 
+        message="Dados salvos com sucesso!" 
+        type="success" 
+        visible={showToast} 
+        onHide={() => setShowToast(false)} 
+      />
     </ScreenContainer>
   );
 }

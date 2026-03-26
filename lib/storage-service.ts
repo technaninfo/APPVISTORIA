@@ -51,8 +51,8 @@ export async function saveInspection(inspection: InspectionState): Promise<Store
     const folderPath = `${Paths.document}/${folderName}`;
 
     // Criar pasta
-    const folder = new Directory(folderPath);
     try {
+      const folder = new Directory(folderPath);
       await folder.create();
     } catch (e) {
       // Pasta pode já existir
@@ -60,8 +60,8 @@ export async function saveInspection(inspection: InspectionState): Promise<Store
     }
 
     // Criar subpasta para fotos
-    const photosFolder = new Directory(folderPath, "fotos");
     try {
+      const photosFolder = new Directory(`${folderPath}/fotos`);
       await photosFolder.create();
     } catch (e) {
       // Pasta pode já existir

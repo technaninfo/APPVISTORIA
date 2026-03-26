@@ -89,3 +89,15 @@
 - [x] Debugar e corrigir erro de salvamento
 - [x] Testar fluxo completo de vistoria
 - [x] Implementar máscara de CPF com testes unitários (11 testes passando)
+
+
+## Melhorias de UX e Correções (Novo Feedback)
+- [x] Corrigir logo do app (logo profissional Check+ instalado)
+- [x] Tornar endereço do vistoriador opcional
+- [x] CPF/CNPJ flexível (aceitar ambos)
+- [x] CREA ou CAU (não ambos obrigatórios para técnica)
+- [x] Corrigir scroll da página de dados (keyboardShouldPersistTaps adicionado)
+- [x] Adicionar notificações de sucesso ao editar (Toast component)
+- [x] Melhorar UX na navegação (haptics e feedback visual)
+- [x] Debugar erro ao finalizar vistoria (corrigido em storage-service)
+- [x] Gerar HTML/PDF automaticamente ao finalizar (corrigido em pdf-service)

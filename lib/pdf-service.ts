@@ -202,7 +202,7 @@ function generateHTMLReport(inspection: InspectionState): string {
         <p>
           ${
             inspection.type === "technical"
-              ? "Este é um relatório de <strong>Vistoria Técnica de Imóvel com ART</strong>. O inspetor responsável assume responsabilidade técnica e profissional pelos dados e conclusões apresentados neste documento."
+              ? "Este é um relatório de <strong>Vistoria Técnica de Imóvel com ART</strong>. O vistoriador responsável assume responsabilidade técnica e profissional pelos dados e conclusões apresentados neste documento."
               : "Este é um relatório de <strong>Vistoria de Entrega de Chaves</strong>. Trata-se de uma inspeção visual não-técnica realizada no momento da entrega do imóvel."
           }
         </p>
@@ -232,13 +232,13 @@ function generateHTMLReport(inspection: InspectionState): string {
       </div>
       <div class="info-item">
         <span class="info-label">Endereço</span>
-        <span class="info-value">${inspection.client.address || "—"}</span>
+        <span class="info-value">${inspection.client.address.street || "—"} ${inspection.client.address.number || ""} ${inspection.client.address.complement || ""}, ${inspection.client.address.city || ""} - ${inspection.client.address.state || ""}</span>
       </div>
     </div>
 
     <!-- Inspector Data -->
     <div class="section">
-      <div class="section-title"Dados do Vistoriador (Contratada)"</div>
+      <div class="section-title">Dados do Vistoriador (Contratada)</div>
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">Nome / Razão Social</span>
