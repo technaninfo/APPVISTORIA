@@ -135,3 +135,18 @@
 - [x] Criar tela de resumo com lista de cômodos
 - [x] Atualizar PDF para consolidar todos os cômodos
 - [ ] Testar fluxo completo com múltiplos cômodos
+
+
+## Fase 13: Reformulação da Etapa 3 - Formulário Dinâmico Inteligente
+- [x] Redesenhar estrutura de dados para suportar formulário dinâmico
+- [x] Criar nova tela de checklist como formulário único
+- [x] Implementar seleção de cômodo (predefinidos + manual)
+- [x] Implementar botões Interno/Externo
+- [x] Implementar itens expansíveis com testes
+- [x] Implementar status: Aprovado/Reprovado/NA
+- [x] Implementar captura de fotos para reprovados
+- [ ] Implementar adição manual de itens
+- [ ] Implementar adição manual de testes
+- [x] Implementar botão "Novo Cômodo"
+- [x] Implementar botão "Finalizar"
+- [ ] Testar fluxo completo
