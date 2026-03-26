@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
+import React, { createContext, useContext, useReducer } from "react";
 
 export type InspectionType = "technical" | "delivery";
 
@@ -13,6 +13,9 @@ export interface AddressData {
 }
 
 export interface ClientData {
+  documentType: "cpf" | "cnpj";
+  document: string;
+  nameType: "individual" | "company";
   fullName: string;
   address: AddressData;
   email: string;
@@ -20,8 +23,10 @@ export interface ClientData {
 }
 
 export interface VistoriadorData {
+  documentType: "cpf" | "cnpj";
+  document: string;
+  nameType: "individual" | "company";
   name: string;
-  cpf: string;
   address: AddressData;
   email: string;
   phone: string;
@@ -91,14 +96,19 @@ const defaultAddress: AddressData = {
 const defaultState: InspectionState = {
   type: null,
   client: {
+    documentType: "cpf",
+    document: "",
+    nameType: "individual",
     fullName: "",
     address: { ...defaultAddress },
     email: "",
     phone: "",
   },
   vistoriador: {
+    documentType: "cpf",
+    document: "",
+    nameType: "individual",
     name: "",
-    cpf: "",
     address: { ...defaultAddress },
     email: "",
     phone: "",
@@ -130,24 +140,47 @@ type Action =
 function inspectionReducer(state: InspectionState, action: Action): InspectionState {
   switch (action.type) {
     case "SET_INSPECTION_TYPE":
-      return { ...state, type: action.payload };
+      return { ...state, type: action.payload, updatedAt: new Date().toISOString() };
     case "UPDATE_CLIENT":
-      return { ...state, client: { ...state.client, ...action.payload } };
+      return {
+        ...state,
+        client: { ...state.client, ...action.payload },
+        updatedAt: new Date().toISOString(),
+      };
     case "UPDATE_VISTORIADOR":
-      return { ...state, vistoriador: { ...state.vistoriador, ...action.payload } };
+      return {
+        ...state,
+        vistoriador: { ...state.vistoriador, ...action.payload },
+        updatedAt: new Date().toISOString(),
+      };
     case "UPDATE_CONDITIONS":
-      return { ...state, conditions: { ...state.conditions, ...action.payload } };
+      return {
+        ...state,
+        conditions: { ...state.conditions, ...action.payload },
+        updatedAt: new Date().toISOString(),
+      };
     case "ADD_PHOTO":
-      return { ...state, items: [...state.items, { id: action.payload.id, name: "", status: "na", photos: [action.payload], description: "" }] };
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.id === action.payload.itemId
+            ? { ...item, photos: [...item.photos, action.payload] }
+            : item
+        ),
+        updatedAt: new Date().toISOString(),
+      };
     case "UPDATE_ITEM":
       return {
         ...state,
         items: state.items.map((item) =>
-          item.id === action.payload.itemId ? { ...item, ...action.payload.data } : item
+          item.id === action.payload.itemId
+            ? { ...item, ...action.payload.data }
+            : item
         ),
+        updatedAt: new Date().toISOString(),
       };
     case "RESET":
-      return defaultState;
+      return { ...defaultState, createdAt: new Date().toISOString() };
     default:
       return state;
   }
@@ -155,7 +188,7 @@ function inspectionReducer(state: InspectionState, action: Action): InspectionSt
 
 const InspectionContext = createContext<InspectionContextType | undefined>(undefined);
 
-export function InspectionProvider({ children }: { children: ReactNode }) {
+export function InspectionProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(inspectionReducer, defaultState);
 
   const value: InspectionContextType = {
@@ -169,7 +202,11 @@ export function InspectionProvider({ children }: { children: ReactNode }) {
     reset: () => dispatch({ type: "RESET" }),
   };
 
-  return <InspectionContext.Provider value={value}>{children}</InspectionContext.Provider>;
+  return (
+    <InspectionContext.Provider value={value}>
+      {children}
+    </InspectionContext.Provider>
+  );
 }
 
 export function useInspection() {

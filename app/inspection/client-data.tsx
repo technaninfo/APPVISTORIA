@@ -25,7 +25,7 @@ export default function ClientDataScreen() {
       !state.client.address.street ||
       !state.client.address.number ||
       !state.vistoriador.name ||
-      !state.vistoriador.cpf ||
+      !state.vistoriador.document ||
       !state.vistoriador.email ||
       !state.vistoriador.phone
     ) {
@@ -165,10 +165,10 @@ export default function ClientDataScreen() {
               required
             />
             <FormInput
-              label="CPF"
+              label="CPF/CNPJ"
               placeholder="Ex: 123.456.789-00"
-              value={state.vistoriador.cpf}
-              onChangeText={(text) => updateVistoriador({ cpf: text })}
+              value={state.vistoriador.document}
+              onChangeText={(text) => updateVistoriador({ document: text })}
               keyboardType="numeric"
               mask={formatCPF}
               required

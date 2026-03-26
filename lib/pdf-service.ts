@@ -246,7 +246,7 @@ function generateHTMLReport(inspection: InspectionState): string {
         </div>
         <div class="info-item">
           <span class="info-label">CPF / CNPJ</span>
-          <span class="info-value">${inspection.vistoriador.cpf || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.document || "—"}</span>
         </div>
         <div class="info-item">
           <span class="info-label">Email</span>

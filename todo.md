@@ -119,3 +119,11 @@
 - [x] Substituir ícones genéricos pela logo Check+ nas telas de tipo de vistoria
 - [x] Corrigir splash screen com logo Check+
 - [x] Gerar relatório PDF de exemplo com vistoria fictícia
+
+
+## Correções de Bugs (Novo Feedback)
+- [x] Upload de logo Check+ para CDN
+- [x] Atualizar logoUrl em app.config.ts
+- [x] Adicionar suporte a CPF/CNPJ para cliente e vistoriador
+- [x] Adicionar suporte a Nome/Razão Social
+- [x] Corrigir referências a cpf em todos os arquivos

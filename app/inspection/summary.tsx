@@ -90,7 +90,7 @@ export default function SummaryScreen() {
             {expandedSections.vistoriador && (
               <SectionContent>
                 <InfoRow label="Nome" value={state.vistoriador.name} />
-                <InfoRow label="CPF" value={state.vistoriador.cpf} />
+                <InfoRow label="CPF/CNPJ" value={state.vistoriador.document} />
                 <InfoRow label="Email" value={state.vistoriador.email} />
                 <InfoRow label="Telefone" value={state.vistoriador.phone} />
                 <InfoRow label="Endereço" value={`${state.vistoriador.address.street}, ${state.vistoriador.address.number} ${state.vistoriador.address.complement}`} />
