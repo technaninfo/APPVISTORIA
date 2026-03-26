@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, Image } from "react-native";
 import { cn } from "@/lib/utils";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
@@ -10,6 +10,8 @@ interface LargeButtonProps {
   variant?: "primary" | "secondary" | "success" | "error";
   disabled?: boolean;
   loading?: boolean;
+  icon?: any;
+  iconSize?: number;
 }
 
 export function LargeButton({
@@ -19,6 +21,8 @@ export function LargeButton({
   variant = "primary",
   disabled = false,
   loading = false,
+  icon,
+  iconSize = 48,
 }: LargeButtonProps) {
   const handlePress = async () => {
     if (!disabled && !loading) {
@@ -56,11 +60,21 @@ export function LargeButton({
     >
       <View
         className={cn(
-          "rounded-2xl px-6 py-5 items-center justify-center min-h-20",
+          "rounded-2xl px-6 py-5 items-center justify-center min-h-20 gap-2",
           variantStyles[variant],
           disabled && "opacity-50"
         )}
       >
+        {icon && (
+          <Image
+            source={icon}
+            style={{
+              width: iconSize,
+              height: iconSize,
+              resizeMode: "contain",
+            }}
+          />
+        )}
         <Text className={cn("text-lg font-bold", textColor[variant])}>{title}</Text>
         {subtitle && <Text className={cn("text-sm mt-1", textColor[variant])}>{subtitle}</Text>}
       </View>

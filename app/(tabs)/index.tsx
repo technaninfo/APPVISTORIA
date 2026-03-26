@@ -67,12 +67,16 @@ export default function HomeScreen() {
               subtitle="com ART"
               onPress={handleTechnicalInspection}
               variant="primary"
+              icon={require("@/assets/images/icon.png")}
+              iconSize={56}
             />
             <LargeButton
               title="Entrega de Chaves"
               subtitle="sem ART"
               onPress={handleDeliveryInspection}
               variant="secondary"
+              icon={require("@/assets/images/icon.png")}
+              iconSize={56}
             />
           </View>
 

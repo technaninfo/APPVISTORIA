@@ -113,3 +113,7 @@
 - [x] Permitir múltiplas fotos por teste reprovado
 - [ ] Integrar com contexto de inspeção
 - [x] Botão para adicionar novo cômodo ou encerrar vistoria
+
+
+## Melhorias de Branding
+- [x] Substituir ícones genéricos pela logo Check+ nas telas de tipo de vistoria
