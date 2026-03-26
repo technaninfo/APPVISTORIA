@@ -5,14 +5,16 @@ import { ScreenContainer } from "@/components/screen-container";
 import { LargeButton } from "@/components/large-button";
 import { PhotoCaptureModal } from "@/components/photo-capture-modal";
 import { INTERNAL_CHECKLIST, EXTERNAL_CHECKLIST, AreaType, TestStatus, ChecklistSection, TestItem, PhotoWithCaption } from "@/lib/checklist-data";
+import { useInspection } from "@/lib/inspection-context";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
 export default function ChecklistScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { addRoom } = useInspection();
   const areaType = (params.areaType as AreaType) || "internal";
-  const roomName = params.roomName || "Cômodo";
+  const roomName = (Array.isArray(params.roomName) ? params.roomName[0] : params.roomName) || "Cômodo";
 
   const [sections, setSections] = useState<ChecklistSection[]>(
     areaType === "internal" ? INTERNAL_CHECKLIST : EXTERNAL_CHECKLIST
@@ -243,7 +245,7 @@ export default function ChecklistScreen() {
           <View className="gap-2">
             <Text className="text-2xl font-bold text-foreground">Checklist</Text>
             <Text className="text-sm text-muted">
-              {areaType === "internal" ? "Área Interna" : "Área Externa"} - {roomName}
+              {areaType === "internal" ? "Área Interna" : "Área Externa"} - {String(roomName)}
             </Text>
           </View>
 
@@ -323,12 +325,47 @@ export default function ChecklistScreen() {
           <View className="gap-3 mt-4">
             <LargeButton
               title="Adicionar Novo Cômodo"
-              onPress={() => router.push("../inspection/room-selection")}
+              onPress={() => {
+                if (allTestsFilled) {
+                  addRoom({
+                    id: `room_${Date.now()}`,
+                    roomName,
+                    areaType,
+                    sections,
+                    memorialAvailable,
+                    projectAvailable,
+                  });
+                  if (Platform.OS !== "web") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  router.push("../inspection/room-selection");
+                } else {
+                  if (Platform.OS !== "web") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                  }
+                }
+              }}
               variant="secondary"
+              disabled={!allTestsFilled}
             />
             <LargeButton
               title="Finalizar Vistoria"
-              onPress={() => router.push("../inspection/summary")}
+              onPress={() => {
+                if (allTestsFilled) {
+                  addRoom({
+                    id: `room_${Date.now()}`,
+                    roomName,
+                    areaType,
+                    sections,
+                    memorialAvailable,
+                    projectAvailable,
+                  });
+                  if (Platform.OS !== "web") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  router.push("../inspection/summary");
+                }
+              }}
               variant="primary"
               disabled={!allTestsFilled}
             />

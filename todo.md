@@ -127,3 +127,16 @@
 - [x] Adicionar suporte a CPF/CNPJ para cliente e vistoriador
 - [x] Adicionar suporte a Nome/Razão Social
 - [x] Corrigir referências a cpf em todos os arquivos
+
+
+## Fase 14: Implementação de Checklist Dinâmico (Nova)
+- [x] Analisar estrutura de dados para cômodos e testes
+- [x] Criar componente de seleção de cômodo (predefinidos + manual)
+- [x] Criar componente de seleção de tipo de área (Interno/Externo)
+- [x] Implementar itens expansíveis com testes
+- [x] Implementar sistema de status (Aprovado/Reprovado/NA)
+- [x] Implementar captura de fotos com legendas
+- [x] Implementar botão "Novo Cômodo"
+- [x] Implementar botão "Finalizar Vistoria"
+- [x] Integrar com contexto global de inspeção
+- [ ] Testar fluxo completo com múltiplos cômodos
