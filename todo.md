@@ -117,3 +117,5 @@
 
 ## Melhorias de Branding
 - [x] Substituir ícones genéricos pela logo Check+ nas telas de tipo de vistoria
+- [x] Corrigir splash screen com logo Check+
+- [x] Gerar relatório PDF de exemplo com vistoria fictícia
