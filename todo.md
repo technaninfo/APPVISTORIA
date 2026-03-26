@@ -152,3 +152,19 @@
 - [x] Integrar com contexto global de inspeção
 - [x] Implementar botão de finalizar vistoria
 - [x] Implementar botão de voltar para adicionar mais cômodos
+
+
+## Fase 16: Correção do Fluxo da Etapa 3 (CRÍTICO)
+- [x] Identificar arquivo que renderiza a tela vazia de "Itens de Vistoria"
+- [x] Redirecionar Etapa 3 para room-selection.tsx (seleção de cômodo)
+- [x] Garantir que checklist dinâmico seja integrado corretamente
+- [ ] Testar fluxo completo: Etapa 1 → Etapa 2 → Etapa 3 (Cômodos) → Etapa 4 (Resumo)
+- [ ] Validar persistência de dados entre etapas
+
+
+## Fase 17: Correção de Problemas Críticos (Auditoria)
+- [x] Adicionar botão "NA" (Não Aplicável) ao lado de cada item para anular todos os testes
+- [x] Corrigir captura de câmera - deve abrir câmera, não galeria
+- [x] Corrigir captura de galeria - deve abrir galeria, não câmera
+- [x] Implementar exportação de PDF no final da vistoria
+- [ ] Testar fluxo completo com múltiplos cômodos e exportação de PDF
