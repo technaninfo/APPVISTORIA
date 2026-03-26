@@ -10,7 +10,7 @@ export default function SummaryScreen() {
   const { state } = useInspection();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     client: true,
-    inspector: true,
+    vistoriador: true,
     conditions: true,
   });
 
@@ -25,11 +25,26 @@ export default function SummaryScreen() {
     router.push("../inspection/export");
   };
 
+  const handleEditSection = (section: string) => {
+    if (section === "client" || section === "vistoriador") {
+      router.push("../inspection/client-data");
+    } else if (section === "conditions") {
+      router.push("../inspection/conditions");
+    }
+  };
+
   const SectionHeader = ({ title, section }: { title: string; section: string }) => (
-    <Pressable onPress={() => toggleSection(section)} className="flex-row items-center justify-between py-3">
-      <Text className="text-lg font-semibold text-foreground">{title}</Text>
-      <Text className="text-xl text-primary">{expandedSections[section] ? "−" : "+"}</Text>
-    </Pressable>
+    <View className="flex-row items-center justify-between py-3">
+      <Pressable onPress={() => toggleSection(section)} className="flex-1">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-lg font-semibold text-foreground">{title}</Text>
+          <Text className="text-xl text-primary">{expandedSections[section] ? "−" : "+"}</Text>
+        </View>
+      </Pressable>
+      <Pressable onPress={() => handleEditSection(section)} className="ml-2 px-3 py-1 bg-primary rounded-full">
+        <Text className="text-xs font-semibold text-white">Editar</Text>
+      </Pressable>
+    </View>
   );
 
   const SectionContent = ({ children }: { children: React.ReactNode }) => (
@@ -61,27 +76,31 @@ export default function SummaryScreen() {
                 <InfoRow label="Nome" value={state.client.fullName} />
                 <InfoRow label="Email" value={state.client.email} />
                 <InfoRow label="Telefone" value={state.client.phone} />
-                <InfoRow label="Endereço" value={state.client.address} />
-                <InfoRow label="CEP" value={state.client.cep} />
+                <InfoRow label="Endereço" value={`${state.client.address.street}, ${state.client.address.number} ${state.client.address.complement}`} />
+                <InfoRow label="Bairro" value={state.client.address.neighborhood} />
+                <InfoRow label="Cidade" value={`${state.client.address.city}, ${state.client.address.state}`} />
+                <InfoRow label="CEP" value={state.client.address.cep} />
               </SectionContent>
             )}
           </View>
 
           {/* Inspector Section */}
           <View className="gap-2">
-            <SectionHeader title="Inspetor (Contratada)" section="inspector" />
-            {expandedSections.inspector && (
+            <SectionHeader title="Vistoriador (Contratada)" section="vistoriador" />
+            {expandedSections.vistoriador && (
               <SectionContent>
-                <InfoRow label="Nome" value={state.inspector.name} />
-                <InfoRow label="CPF/CNPJ" value={state.inspector.cpfCnpj} />
-                <InfoRow label="Email" value={state.inspector.email} />
-                <InfoRow label="Telefone" value={state.inspector.phone} />
-                <InfoRow label="Endereço" value={state.inspector.address} />
-                <InfoRow label="CEP" value={state.inspector.cep} />
+                <InfoRow label="Nome" value={state.vistoriador.name} />
+                <InfoRow label="CPF" value={state.vistoriador.cpf} />
+                <InfoRow label="Email" value={state.vistoriador.email} />
+                <InfoRow label="Telefone" value={state.vistoriador.phone} />
+                <InfoRow label="Endereço" value={`${state.vistoriador.address.street}, ${state.vistoriador.address.number} ${state.vistoriador.address.complement}`} />
+                <InfoRow label="Bairro" value={state.vistoriador.address.neighborhood} />
+                <InfoRow label="Cidade" value={`${state.vistoriador.address.city}, ${state.vistoriador.address.state}`} />
+                <InfoRow label="CEP" value={state.vistoriador.address.cep} />
                 {state.type === "technical" && (
                   <>
-                    <InfoRow label="CREA" value={state.inspector.crea || ""} />
-                    <InfoRow label="CAU" value={state.inspector.cau || ""} />
+                    <InfoRow label="CREA" value={state.vistoriador.crea || ""} />
+                    <InfoRow label="CAU" value={state.vistoriador.cau || ""} />
                   </>
                 )}
               </SectionContent>

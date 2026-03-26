@@ -227,7 +227,7 @@ function generateHTMLReport(inspection: InspectionState): string {
         </div>
         <div class="info-item">
           <span class="info-label">CEP</span>
-          <span class="info-value">${inspection.client.cep || "—"}</span>
+          <span class="info-value">${inspection.client.address.cep || "—"}</span>
         </div>
       </div>
       <div class="info-item">
@@ -238,34 +238,34 @@ function generateHTMLReport(inspection: InspectionState): string {
 
     <!-- Inspector Data -->
     <div class="section">
-      <div class="section-title">Dados do Inspetor (Contratada)</div>
+      <div class="section-title"Dados do Vistoriador (Contratada)"</div>
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">Nome / Razão Social</span>
-          <span class="info-value">${inspection.inspector.name || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.name || "—"}</span>
         </div>
         <div class="info-item">
           <span class="info-label">CPF / CNPJ</span>
-          <span class="info-value">${inspection.inspector.cpfCnpj || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.cpf || "—"}</span>
         </div>
         <div class="info-item">
           <span class="info-label">Email</span>
-          <span class="info-value">${inspection.inspector.email || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.email || "—"}</span>
         </div>
         <div class="info-item">
           <span class="info-label">Telefone</span>
-          <span class="info-value">${inspection.inspector.phone || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.phone || "—"}</span>
         </div>
         ${
           inspection.type === "technical"
             ? `
         <div class="info-item">
           <span class="info-label">CREA</span>
-          <span class="info-value">${inspection.inspector.crea || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.crea || "—"}</span>
         </div>
         <div class="info-item">
           <span class="info-label">CAU</span>
-          <span class="info-value">${inspection.inspector.cau || "—"}</span>
+          <span class="info-value">${inspection.vistoriador.cau || "—"}</span>
         </div>
         `
             : ""
@@ -332,7 +332,7 @@ function generateHTMLReport(inspection: InspectionState): string {
       </div>
       <div class="signature-block">
         <div class="signature-line">
-          ${inspection.inspector.name || "Inspetor"}
+          ${inspection.vistoriador.name || "Vistoriador"}
         </div>
       </div>
     </div>

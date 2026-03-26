@@ -52,11 +52,21 @@ export async function saveInspection(inspection: InspectionState): Promise<Store
 
     // Criar pasta
     const folder = new Directory(folderPath);
-    await folder.create();
+    try {
+      await folder.create();
+    } catch (e) {
+      // Pasta pode já existir
+      console.log("Pasta já existe ou erro ao criar", e);
+    }
 
     // Criar subpasta para fotos
     const photosFolder = new Directory(folderPath, "fotos");
-    await photosFolder.create();
+    try {
+      await photosFolder.create();
+    } catch (e) {
+      // Pasta pode já existir
+      console.log("Pasta de fotos já existe ou erro ao criar", e);
+    }
 
     // Salvar metadados
     const metadata: StoredInspection = {

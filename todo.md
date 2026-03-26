@@ -77,3 +77,14 @@
 - [ ] Criar build APK
 - [ ] Testar APK em dispositivo Android
 - [ ] Documentação final e instruções de uso
+
+
+## Correções e Melhorias (Feedback do Usuário)
+- [x] Atualizar logo do app com logo profissional Check+
+- [x] Reformular campos de endereço (rua, número, complemento, bairro, município, estado)
+- [x] Adicionar máscara de CPF padrão
+- [x] Trocar "Inspetor" por "Vistoriador" em todo o app
+- [x] Adicionar botões de edição na página de resumo
+- [x] Adicionar histórico de vistorias na tela inicial
+- [x] Debugar e corrigir erro de salvamento
+- [ ] Testar fluxo completo de vistoria

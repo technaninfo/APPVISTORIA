@@ -2,19 +2,27 @@ import React, { createContext, useContext, useReducer, ReactNode } from "react";
 
 export type InspectionType = "technical" | "delivery";
 
+export interface AddressData {
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  cep: string;
+}
+
 export interface ClientData {
   fullName: string;
-  address: string;
-  cep: string;
+  address: AddressData;
   email: string;
   phone: string;
 }
 
-export interface InspectorData {
+export interface VistoriadorData {
   name: string;
-  cpfCnpj: string;
-  address: string;
-  cep: string;
+  cpf: string;
+  address: AddressData;
   email: string;
   phone: string;
   crea?: string;
@@ -52,7 +60,7 @@ export interface InspectionItem {
 export interface InspectionState {
   type: InspectionType | null;
   client: ClientData;
-  inspector: InspectorData;
+  vistoriador: VistoriadorData;
   conditions: InspectionConditions;
   items: InspectionItem[];
   createdAt: string;
@@ -63,27 +71,35 @@ export interface InspectionContextType {
   state: InspectionState;
   setInspectionType: (type: InspectionType) => void;
   updateClient: (data: Partial<ClientData>) => void;
-  updateInspector: (data: Partial<InspectorData>) => void;
+  updateVistoriador: (data: Partial<VistoriadorData>) => void;
   updateConditions: (data: Partial<InspectionConditions>) => void;
   addPhoto: (photo: InspectionPhoto) => void;
   updateItem: (itemId: string, data: Partial<InspectionItem>) => void;
   reset: () => void;
 }
 
+const defaultAddress: AddressData = {
+  street: "",
+  number: "",
+  complement: "",
+  neighborhood: "",
+  city: "",
+  state: "",
+  cep: "",
+};
+
 const defaultState: InspectionState = {
   type: null,
   client: {
     fullName: "",
-    address: "",
-    cep: "",
+    address: { ...defaultAddress },
     email: "",
     phone: "",
   },
-  inspector: {
+  vistoriador: {
     name: "",
-    cpfCnpj: "",
-    address: "",
-    cep: "",
+    cpf: "",
+    address: { ...defaultAddress },
     email: "",
     phone: "",
     crea: "",
@@ -105,7 +121,7 @@ const defaultState: InspectionState = {
 type Action =
   | { type: "SET_INSPECTION_TYPE"; payload: InspectionType }
   | { type: "UPDATE_CLIENT"; payload: Partial<ClientData> }
-  | { type: "UPDATE_INSPECTOR"; payload: Partial<InspectorData> }
+  | { type: "UPDATE_VISTORIADOR"; payload: Partial<VistoriadorData> }
   | { type: "UPDATE_CONDITIONS"; payload: Partial<InspectionConditions> }
   | { type: "ADD_PHOTO"; payload: InspectionPhoto }
   | { type: "UPDATE_ITEM"; payload: { itemId: string; data: Partial<InspectionItem> } }
@@ -117,8 +133,8 @@ function inspectionReducer(state: InspectionState, action: Action): InspectionSt
       return { ...state, type: action.payload };
     case "UPDATE_CLIENT":
       return { ...state, client: { ...state.client, ...action.payload } };
-    case "UPDATE_INSPECTOR":
-      return { ...state, inspector: { ...state.inspector, ...action.payload } };
+    case "UPDATE_VISTORIADOR":
+      return { ...state, vistoriador: { ...state.vistoriador, ...action.payload } };
     case "UPDATE_CONDITIONS":
       return { ...state, conditions: { ...state.conditions, ...action.payload } };
     case "ADD_PHOTO":
@@ -146,7 +162,7 @@ export function InspectionProvider({ children }: { children: ReactNode }) {
     state,
     setInspectionType: (type) => dispatch({ type: "SET_INSPECTION_TYPE", payload: type }),
     updateClient: (data) => dispatch({ type: "UPDATE_CLIENT", payload: data }),
-    updateInspector: (data) => dispatch({ type: "UPDATE_INSPECTOR", payload: data }),
+    updateVistoriador: (data) => dispatch({ type: "UPDATE_VISTORIADOR", payload: data }),
     updateConditions: (data) => dispatch({ type: "UPDATE_CONDITIONS", payload: data }),
     addPhoto: (photo) => dispatch({ type: "ADD_PHOTO", payload: photo }),
     updateItem: (itemId, data) => dispatch({ type: "UPDATE_ITEM", payload: { itemId, data } }),
