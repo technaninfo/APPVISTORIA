@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Vistoria - Check+ Vistorias</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        
+        .page {
+            background: white;
+            margin: 20px auto;
+            padding: 40px;
+            max-width: 900px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            page-break-after: always;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #0a7ea4;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0a7ea4;
+            margin-bottom: 10px;
+        }
+        
+        .logo-plus {
+            color: #22C55E;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0a7ea4;
+            margin: 20px 0 10px 0;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0a7ea4;
+            background: #f0f8ff;
+            padding: 10px 15px;
+            border-left: 4px solid #0a7ea4;
+            margin-bottom: 15px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .checklist-item {
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .checklist-header {
+            background: #f0f8ff;
+            padding: 12px 15px;
+            border-bottom: 1px solid #0a7ea4;
+            font-weight: bold;
+            color: #0a7ea4;
+            font-size: 14px;
+        }
+        
+        .checklist-tests {
+            padding: 15px;
+        }
+        
+        .test {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        
+        .test:last-child {
+            border-bottom: none;
+        }
+        
+        .test-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .test-status.approved {
+            background: #22C55E;
+        }
+        
+        .test-status.rejected {
+            background: #EF4444;
+        }
+        
+        .test-status.na {
+            background: #999;
+        }
+        
+        .test-description {
+            flex: 1;
+        }
+        
+        .room-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0a7ea4;
+        }
+        
+        .room-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0a7ea4;
+            margin-bottom: 10px;
+        }
+        
+        .room-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .observations {
+            background: #fff9e6;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 15px;
+            border-radius: 3px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 5px;
+            border: 1px solid #0a7ea4;
+        }
+        
+        .summary-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0a7ea4;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .signature-section {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .signature-box {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- PÁGINA 1: CAPA E DADOS GERAIS -->
+    <div class="page">
+        <div class="header">
+            <div class="logo">Check<span class="logo-plus">+</span></div>
+            <div class="subtitle">Sistema de Vistorias Imobiliárias</div>
+        </div>
+        
+        <div style="text-align: center; margin: 60px 0;">
+            <div class="title">RELATÓRIO DE VISTORIA</div>
+            <div class="subtitle">Entrega de Chaves</div>
+            <div style="margin: 40px 0; font-size: 14px; color: #666;">
+                <p><strong>Data da Vistoria:</strong> 26 de março de 2026</p>
+                <p><strong>Hora:</strong> 14:30</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">DADOS DO CLIENTE</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Razão Social</div>
+                    <div class="info-value">Silva Imóveis LTDA</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">CNPJ</div>
+                    <div class="info-value">12.345.678/0001-90</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">contato@silvaimoveis.com.br</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Telefone</div>
+                    <div class="info-value">(11) 98765-4321</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">DADOS DO VISTORIADOR</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Nome</div>
+                    <div class="info-value">João da Silva Santos</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">CPF</div>
+                    <div class="info-value">123.456.789-00</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">joao.santos@vistoriador.com.br</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Telefone</div>
+                    <div class="info-value">(11) 99999-8888</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">CONDIÇÕES DA VISTORIA</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Clima</div>
+                    <div class="info-value">Ensolarado</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Acesso</div>
+                    <div class="info-value">Total</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Iluminação</div>
+                    <div class="info-value">Adequada</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Ocupação</div>
+                    <div class="info-value">Desocupado</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PÁGINA 2: CHECKLIST SALA DE ESTAR (INTERNA) -->
+    <div class="page">
+        <div class="room-section">
+            <div class="room-title">🏠 SALA DE ESTAR - ÁREA INTERNA</div>
+            <div class="room-meta">
+                <strong>Memorial Disponível:</strong> Sim | <strong>Projeto Disponível:</strong> Sim
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">1. Conferência de Dimensões</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Comprimento conforme projeto</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Largura conforme projeto</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Pé-direito conforme especificado</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">2. Paredes e Revestimentos</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Tipo conforme memorial descritivo</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Pintura uniforme</div>
+                </div>
+                <div class="test">
+                    <div class="test-status rejected">✕</div>
+                    <div class="test-description">Sem manchas, bolhas ou descascamento</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Revestimentos sem trincas ou peças ocas</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Rejuntes uniformes</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">3. Pisos</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Tipo conforme memorial</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Nivelamento adequado</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Sem peças soltas ou ocas</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Rejuntes completos</div>
+                </div>
+                <div class="test">
+                    <div class="test-status na">NA</div>
+                    <div class="test-description">Caimento adequado (áreas molhadas)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">4. Teto / Forro</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Tipo conforme memorial</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Sem fissuras ou manchas</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Nivelamento adequado</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="observations">
+            <strong>Observações:</strong> Pequena mancha de umidade na parede próxima à janela. Recomenda-se verificar a vedação da esquadria.
+        </div>
+    </div>
+    
+    <!-- PÁGINA 3: CHECKLIST COZINHA (INTERNA) -->
+    <div class="page">
+        <div class="room-section">
+            <div class="room-title">🍳 COZINHA - ÁREA INTERNA</div>
+            <div class="room-meta">
+                <strong>Memorial Disponível:</strong> Sim | <strong>Projeto Disponível:</strong> Sim
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">6. Instalações Elétricas</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Pontos conforme projeto</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Tomadas funcionando</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Interruptores funcionando</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Acabamentos fixos</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">7. Instalações Hidráulicas</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Pontos conforme projeto</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Pressão adequada</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Sem vazamentos</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Escoamento adequado</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">8. Louças e Metais</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Tipo conforme memorial</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Fixação adequada</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Funcionamento correto</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="checklist-item">
+            <div class="checklist-header">12. Limpeza</div>
+            <div class="checklist-tests">
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Ambiente limpo</div>
+                </div>
+                <div class="test">
+                    <div class="test-status approved">✓</div>
+                    <div class="test-description">Sem resíduos de obra</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="observations">
+            <strong>Observações:</strong> Cozinha em perfeito estado. Todos os itens aprovados.
+        </div>
+    </div>
+    
+    <!-- PÁGINA 4: RESUMO E ASSINATURAS -->
+    <div class="page">
+        <div class="title">RESUMO DA VISTORIA</div>
+        
+        <div class="summary">
+            <div class="summary-item">
+                <div class="summary-number">47</div>
+                <div class="summary-label">Total de Testes</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number">44</div>
+                <div class="summary-label">Aprovados</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number">3</div>
+                <div class="summary-label">Reprovados</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0; font-size: 18px; font-weight: bold; color: #22C55E;">
+            Taxa de Aprovação: 93.6%
+        </div>
+        
+        <div class="section">
+            <div class="section-title">RECOMENDAÇÕES</div>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Verificar vedação da janela da sala de estar (mancha de umidade)</li>
+                <li>Retocar pintura na parede com manchas</li>
+                <li>Realizar limpeza final antes da entrega</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">CONCLUSÃO</div>
+            <p style="text-align: justify;">
+                A vistoria foi realizada conforme os padrões estabelecidos no memorial descritivo. O imóvel apresenta-se em bom estado de conservação, com pequenos ajustes necessários conforme indicado nas recomendações acima. Recomenda-se a conclusão dos itens pendentes antes da entrega final ao cliente.
+            </p>
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-box">
+                <p style="margin-bottom: 30px;">_________________________________</p>
+                <p><strong>Vistoriador</strong></p>
+                <p>João da Silva Santos</p>
+                <p style="font-size: 11px; margin-top: 5px;">CPF: 123.456.789-00</p>
+            </div>
+            <div class="signature-box">
+                <p style="margin-bottom: 30px;">_________________________________</p>
+                <p><strong>Cliente / Responsável</strong></p>
+                <p>Silva Imóveis LTDA</p>
+                <p style="font-size: 11px; margin-top: 5px;">CNPJ: 12.345.678/0001-90</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Relatório gerado automaticamente pelo sistema Check+ Vistorias</p>
+            <p>Data: 26 de março de 2026 | Hora: 14:30</p>
+        </div>
+    </div>
+</body>
+</html>
