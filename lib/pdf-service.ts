@@ -273,6 +273,54 @@ function generateHTMLReport(inspection: InspectionState): string {
       </div>
     </div>
 
+    <!-- Rooms Section -->
+    ${inspection.rooms.length > 0 ? `
+    <div class="section">
+      <div class="section-title">Cômodos Vistoriados</div>
+      ${inspection.rooms.map((room) => {
+        const totalTests = room.sections.reduce((sum, s) => sum + s.tests.length, 0);
+        const approvedTests = room.sections.reduce(
+          (sum, s) => sum + s.tests.filter((t) => t.status === "approved").length,
+          0
+        );
+        const rejectedTests = room.sections.reduce(
+          (sum, s) => sum + s.tests.filter((t) => t.status === "rejected").length,
+          0
+        );
+        const naTests = room.sections.reduce(
+          (sum, s) => sum + s.tests.filter((t) => t.status === "na").length,
+          0
+        );
+        const approvalRate = totalTests > 0 ? Math.round((approvedTests / (totalTests - naTests)) * 100) : 0;
+        
+        return `
+        <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-left: 4px solid #0a7ea4; border-radius: 4px;">
+          <h3 style="font-size: 16px; font-weight: bold; color: #0a7ea4; margin-bottom: 10px;">${room.roomName}</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+              <span style="font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase;">Tipo</span>
+              <span style="font-size: 14px; color: #333;">${room.areaType === "internal" ? "Interna" : "Externa"}</span>
+            </div>
+            <div>
+              <span style="font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase;">Testes</span>
+              <span style="font-size: 14px; color: #333;">${totalTests}</span>
+            </div>
+            <div>
+              <span style="font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase;">Aprovados</span>
+              <span style="font-size: 14px; color: #065f46;"><strong>${approvedTests}</strong></span>
+            </div>
+            <div>
+              <span style="font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase;">Reprovados</span>
+              <span style="font-size: 14px; color: #991b1b;"><strong>${rejectedTests}</strong></span>
+            </div>
+          </div>
+          ${room.observations ? `<p style="font-size: 13px; color: #333; font-style: italic;"><strong>Observações:</strong> ${room.observations}</p>` : ""}
+        </div>
+        `;
+      }).join("")}
+    </div>
+    ` : ""}
+
     <!-- Inspection Conditions -->
     <div class="section">
       <div class="section-title">Condições da Vistoria</div>

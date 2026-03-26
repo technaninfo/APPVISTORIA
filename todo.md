@@ -127,3 +127,11 @@
 - [x] Adicionar suporte a CPF/CNPJ para cliente e vistoriador
 - [x] Adicionar suporte a Nome/Razão Social
 - [x] Corrigir referências a cpf em todos os arquivos
+
+
+## Fase 12: Múltiplos Cômodos em Uma Vistoria
+- [x] Atualizar contexto para suportar array de cômodos
+- [x] Modificar fluxo de navegação para permitir adicionar cômodos
+- [x] Criar tela de resumo com lista de cômodos
+- [x] Atualizar PDF para consolidar todos os cômodos
+- [ ] Testar fluxo completo com múltiplos cômodos

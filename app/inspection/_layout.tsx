@@ -9,6 +9,9 @@ export default function InspectionLayout() {
     >
       <Stack.Screen name="client-data" />
       <Stack.Screen name="conditions" />
+      <Stack.Screen name="room-selection" />
+      <Stack.Screen name="checklist" />
+      <Stack.Screen name="rooms-summary" />
       <Stack.Screen name="items" />
       <Stack.Screen name="summary" />
       <Stack.Screen name="export" />
