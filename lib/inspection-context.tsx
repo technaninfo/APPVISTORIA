@@ -54,30 +54,6 @@ export interface InspectionPhoto {
   description?: string;
 }
 
-export interface RoomChecklist {
-  id: string;
-  roomName: string;
-  areaType: "internal" | "external";
-  sections: ChecklistSection[];
-  memorialAvailable: boolean;
-  projectAvailable: boolean;
-  overallStatus: "pending" | "approved" | "rejected";
-  observations: string;
-}
-
-export interface ChecklistSection {
-  id: string;
-  title: string;
-  tests: ChecklistTest[];
-}
-
-export interface ChecklistTest {
-  id: string;
-  description: string;
-  status: "pending" | "approved" | "rejected" | "na";
-  photos: InspectionPhoto[];
-}
-
 export interface InspectionItem {
   id: string;
   name: string;
@@ -92,7 +68,6 @@ export interface InspectionState {
   vistoriador: VistoriadorData;
   conditions: InspectionConditions;
   items: InspectionItem[];
-  rooms: RoomChecklist[];
   createdAt: string;
   updatedAt: string;
 }
@@ -105,9 +80,6 @@ export interface InspectionContextType {
   updateConditions: (data: Partial<InspectionConditions>) => void;
   addPhoto: (photo: InspectionPhoto) => void;
   updateItem: (itemId: string, data: Partial<InspectionItem>) => void;
-  addRoom: (room: RoomChecklist) => void;
-  updateRoom: (roomId: string, data: Partial<RoomChecklist>) => void;
-  removeRoom: (roomId: string) => void;
   reset: () => void;
 }
 
@@ -152,7 +124,6 @@ const defaultState: InspectionState = {
     occupancy: "empty",
   },
   items: [],
-  rooms: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -164,9 +135,6 @@ type Action =
   | { type: "UPDATE_CONDITIONS"; payload: Partial<InspectionConditions> }
   | { type: "ADD_PHOTO"; payload: InspectionPhoto }
   | { type: "UPDATE_ITEM"; payload: { itemId: string; data: Partial<InspectionItem> } }
-  | { type: "ADD_ROOM"; payload: RoomChecklist }
-  | { type: "UPDATE_ROOM"; payload: { roomId: string; data: Partial<RoomChecklist> } }
-  | { type: "REMOVE_ROOM"; payload: string }
   | { type: "RESET" };
 
 function inspectionReducer(state: InspectionState, action: Action): InspectionState {
@@ -211,28 +179,6 @@ function inspectionReducer(state: InspectionState, action: Action): InspectionSt
         ),
         updatedAt: new Date().toISOString(),
       };
-    case "ADD_ROOM":
-      return {
-        ...state,
-        rooms: [...state.rooms, action.payload],
-        updatedAt: new Date().toISOString(),
-      };
-    case "UPDATE_ROOM":
-      return {
-        ...state,
-        rooms: state.rooms.map((room) =>
-          room.id === action.payload.roomId
-            ? { ...room, ...action.payload.data }
-            : room
-        ),
-        updatedAt: new Date().toISOString(),
-      };
-    case "REMOVE_ROOM":
-      return {
-        ...state,
-        rooms: state.rooms.filter((room) => room.id !== action.payload),
-        updatedAt: new Date().toISOString(),
-      };
     case "RESET":
       return { ...defaultState, createdAt: new Date().toISOString() };
     default:
@@ -253,9 +199,6 @@ export function InspectionProvider({ children }: { children: React.ReactNode }) 
     updateConditions: (data) => dispatch({ type: "UPDATE_CONDITIONS", payload: data }),
     addPhoto: (photo) => dispatch({ type: "ADD_PHOTO", payload: photo }),
     updateItem: (itemId, data) => dispatch({ type: "UPDATE_ITEM", payload: { itemId, data } }),
-    addRoom: (room) => dispatch({ type: "ADD_ROOM", payload: room }),
-    updateRoom: (roomId, data) => dispatch({ type: "UPDATE_ROOM", payload: { roomId, data } }),
-    removeRoom: (roomId) => dispatch({ type: "REMOVE_ROOM", payload: roomId }),
     reset: () => dispatch({ type: "RESET" }),
   };
 

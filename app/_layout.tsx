@@ -9,7 +9,6 @@ import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { InspectionProvider } from "@/lib/inspection-context";
-import { initializeSampleData } from "@/lib/init-sample-data";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -38,8 +37,6 @@ export default function RootLayout() {
   // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
-    // Inicializar dados fictícios na primeira execução
-    initializeSampleData();
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
