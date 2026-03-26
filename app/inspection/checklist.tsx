@@ -338,7 +338,7 @@ export default function ChecklistScreen() {
                   if (Platform.OS !== "web") {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
-                  router.push("../inspection/room-selection");
+                  router.push("../inspection/rooms-summary");
                 } else {
                   if (Platform.OS !== "web") {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -363,7 +363,7 @@ export default function ChecklistScreen() {
                   if (Platform.OS !== "web") {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
-                  router.push("../inspection/summary");
+                  router.push("../inspection/rooms-summary");
                 }
               }}
               variant="primary"

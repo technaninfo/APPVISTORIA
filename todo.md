@@ -140,3 +140,15 @@
 - [x] Implementar botão "Finalizar Vistoria"
 - [x] Integrar com contexto global de inspeção
 - [ ] Testar fluxo completo com múltiplos cômodos
+
+
+## Fase 15: Tela de Resumo Consolidada (Nova)
+- [x] Criar componente de card de cômodo com status visual
+- [x] Implementar listagem de todos os cômodos da inspeção
+- [x] Adicionar indicador de status geral (Aprovado/Reprovado/Misto)
+- [x] Implementar botão de editar cômodo
+- [x] Implementar botão de remover cômodo
+- [x] Adicionar resumo estatístico (total de testes, aprovados, reprovados)
+- [x] Integrar com contexto global de inspeção
+- [x] Implementar botão de finalizar vistoria
+- [x] Implementar botão de voltar para adicionar mais cômodos
