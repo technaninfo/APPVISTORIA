@@ -1,15 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const INSPECTIONS_KEY = "inspections";
+const INSPECTIONS_KEY = "inspections_list";
 const SAMPLE_INITIALIZED = "sample_initialized";
 
 export async function initializeSampleData() {
   try {
-    // Verificar se já foi inicializado
-    const isInitialized = await AsyncStorage.getItem(SAMPLE_INITIALIZED);
-    if (isInitialized) {
-      return;
-    }
+    // Sempre reinicializar para garantir que os dados estão presentes
+    // (remover esta linha se quiser manter o comportamento de uma única inicialização)
 
     // Dados fictícios da vistoria
     const sampleInspection = {
@@ -115,14 +112,28 @@ export async function initializeSampleData() {
     const existingInspections = await AsyncStorage.getItem(INSPECTIONS_KEY);
     const inspections = existingInspections ? JSON.parse(existingInspections) : [];
 
+    // Preparar dados da vistoria para o índice
+    const sampleIndex = {
+      id: sampleInspection.id,
+      type: sampleInspection.type,
+      clientName: sampleInspection.clientName,
+      date: sampleInspection.conditions.date,
+      folderPath: "",
+      createdAt: sampleInspection.createdAt,
+    };
+
     // Adicionar vistoria fictícia
-    inspections.unshift(sampleInspection);
+    inspections.unshift(sampleIndex);
     await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(inspections));
 
-    // Marcar como inicializado
-    await AsyncStorage.setItem(SAMPLE_INITIALIZED, "true");
+    // Salvar também os dados completos da vistoria
+    const inspectionKey = `inspection_${sampleInspection.id}`;
+    await AsyncStorage.setItem(inspectionKey, JSON.stringify(sampleInspection));
 
     console.log("✅ Dados de exemplo carregados com sucesso!");
+    console.log("Vistoria ID:", sampleInspection.id);
+    console.log("Cliente:", sampleInspection.clientName);
+    console.log("Inspeções salvas:", inspections.length);
   } catch (error) {
     console.error("❌ Erro ao inicializar dados de exemplo:", error);
   }
