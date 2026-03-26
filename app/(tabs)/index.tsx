@@ -44,8 +44,11 @@ export default function HomeScreen() {
   };
 
   const handleOpenInspection = (id: string) => {
-    // TODO: Implementar abertura de vistoria existente
-    console.log("Abrir vistoria:", id);
+    // Navegar para tela de visualização de vistoria
+    router.push({
+      pathname: "../inspection/view-inspection",
+      params: { id },
+    });
   };
 
   return (

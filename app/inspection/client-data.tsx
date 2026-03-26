@@ -1,6 +1,6 @@
-import { ScrollView, View, Text, Pressable } from "react-native";
+import { ScrollView, View, Text, Pressable, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { FormInput } from "@/components/form-input";
 import { LargeButton } from "@/components/large-button";
@@ -8,13 +8,13 @@ import { Toast } from "@/components/toast";
 import { useInspection } from "@/lib/inspection-context";
 import { useCPFMask } from "@/hooks/use-cpf-mask";
 import * as Haptics from "expo-haptics";
-import { Platform } from "react-native";
 
 export default function ClientDataScreen() {
   const router = useRouter();
   const { state, updateClient, updateVistoriador } = useInspection();
   const { formatCPF } = useCPFMask();
   const [showToast, setShowToast] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleNext = async () => {
     // Permitir prosseguir sem validações obrigatórias
@@ -29,9 +29,18 @@ export default function ClientDataScreen() {
     }, 500);
   };
 
+  const handleInputFocus = (yOffset: number) => {
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ y: yOffset, animated: true });
+      }, 100);
+    }
+  };
+
   return (
     <ScreenContainer className="p-6">
       <ScrollView 
+        ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }} 
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
