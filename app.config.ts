@@ -32,7 +32,7 @@ const env = {
   appSlug: "check-plus-vistorias",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663473807449/SRKjaahtg7BZ5tSm3BCh52/icon-kZV2PtwApdaWVyWwP6vhkS.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -64,7 +64,14 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    permissions: ["POST_NOTIFICATIONS"],
+    permissions: [
+      "POST_NOTIFICATIONS",
+      "CAMERA",
+      "ACCESS_FINE_LOCATION",
+      "ACCESS_COARSE_LOCATION",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE"
+    ],
     intentFilters: [
       {
         action: "VIEW",
@@ -86,6 +93,18 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    [
+      "expo-camera",
+      {
+        cameraPermission: "Allow $(PRODUCT_NAME) to access your camera.",
+      },
+    ],
+    [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission: "Allow $(PRODUCT_NAME) to access your location.",
+      },
+    ],
     [
       "expo-audio",
       {

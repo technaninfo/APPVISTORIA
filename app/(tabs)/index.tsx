@@ -1,45 +1,57 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
-
+import { ScrollView, View, Text } from "react-native";
+import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { LargeButton } from "@/components/large-button";
+import { useInspection } from "@/lib/inspection-context";
 
-/**
- * Home Screen - NativeWind Example
- *
- * This template uses NativeWind (Tailwind CSS for React Native).
- * You can use familiar Tailwind classes directly in className props.
- *
- * Key patterns:
- * - Use `className` instead of `style` for most styling
- * - Theme colors: use tokens directly (bg-background, text-foreground, bg-primary, etc.); no dark: prefix needed
- * - Responsive: standard Tailwind breakpoints work on web
- * - Custom colors defined in tailwind.config.js
- */
 export default function HomeScreen() {
+  const router = useRouter();
+  const { setInspectionType } = useInspection();
+
+  const handleTechnicalInspection = () => {
+    setInspectionType("technical");
+    router.push("../inspection/client-data");
+  };
+
+  const handleDeliveryInspection = () => {
+    setInspectionType("delivery");
+    router.push("../inspection/client-data");
+  };
+
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-8">
-          {/* Hero Section */}
-          <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">Welcome</Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <View className="flex-1 justify-center gap-6">
+          {/* Header */}
+          <View className="items-center gap-2 mb-4">
+            <Text className="text-3xl font-bold text-foreground">Check+ Vistorias</Text>
             <Text className="text-base text-muted text-center">
-              Edit app/(tabs)/index.tsx to get started
+              Selecione o tipo de vistoria para começar
             </Text>
           </View>
 
-          {/* Example Card */}
-          <View className="w-full max-w-sm self-center bg-surface rounded-2xl p-6 shadow-sm border border-border">
-            <Text className="text-lg font-semibold text-foreground mb-2">NativeWind Ready</Text>
-            <Text className="text-sm text-muted leading-relaxed">
-              Use Tailwind CSS classes directly in your React Native components.
-            </Text>
+          {/* Buttons */}
+          <View className="gap-4">
+            <LargeButton
+              title="Vistoria Técnica"
+              subtitle="com ART"
+              onPress={handleTechnicalInspection}
+              variant="primary"
+            />
+            <LargeButton
+              title="Entrega de Chaves"
+              subtitle="sem ART"
+              onPress={handleDeliveryInspection}
+              variant="secondary"
+            />
           </View>
 
-          {/* Example Button */}
-          <View className="items-center">
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-full active:opacity-80">
-              <Text className="text-background font-semibold">Get Started</Text>
-            </TouchableOpacity>
+          {/* Info Section */}
+          <View className="mt-8 bg-surface rounded-2xl p-4 border border-border">
+            <Text className="text-sm font-semibold text-foreground mb-2">ℹ️ Informações</Text>
+            <Text className="text-xs text-muted leading-relaxed">
+              O aplicativo funciona completamente offline. Todos os dados são armazenados localmente no seu dispositivo.
+            </Text>
           </View>
         </View>
       </ScrollView>
