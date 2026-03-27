@@ -39,18 +39,16 @@ export function PhotoCaptureModal({
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
+      if (!result.canceled && result.assets[0]) {
         const newPhoto: PhotoWithCaption = {
           id: `photo_${Date.now()}`,
-          uri: asset.uri,
-          caption: caption || "Foto capturada",
+          uri: result.assets[0].uri,
+          caption: caption || "Sem legenda",
           timestamp: new Date().toISOString(),
         };
 
         setPhotos([...photos, newPhoto]);
         setCaption("");
-        console.log("Foto capturada com sucesso:", newPhoto);
 
         if (Platform.OS !== "web") {
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -83,18 +81,16 @@ export function PhotoCaptureModal({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
       });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
+      if (!result.canceled && result.assets[0]) {
         const newPhoto: PhotoWithCaption = {
           id: `photo_${Date.now()}`,
-          uri: asset.uri,
-          caption: caption || "Foto capturada",
+          uri: result.assets[0].uri,
+          caption: caption || "Sem legenda",
           timestamp: new Date().toISOString(),
         };
 
         setPhotos([...photos, newPhoto]);
         setCaption("");
-        console.log("Foto capturada com sucesso:", newPhoto);
 
         if (Platform.OS !== "web") {
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
