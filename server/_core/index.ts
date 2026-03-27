@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
-import net from "net";
+import * as net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -31,7 +31,7 @@ async function startServer() {
   const server = createServer(app);
 
   // Enable CORS for all routes - reflect the request origin to support credentials
-  app.use((req, res, next) => {
+  app.use((req: any, res: any, next: any) => {
     const origin = req.headers.origin;
     if (origin) {
       res.header("Access-Control-Allow-Origin", origin);
@@ -56,7 +56,7 @@ async function startServer() {
 
   registerOAuthRoutes(app);
 
-  app.get("/api/health", (_req, res) => {
+  app.get("/api/health", (_req: any, res: any) => {
     res.json({ ok: true, timestamp: Date.now() });
   });
 

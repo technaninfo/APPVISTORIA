@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { LargeButton } from "@/components/large-button";
-import { PhotoCaptureModal } from "@/components/photo-capture-modal";
+
 import { INTERNAL_CHECKLIST, EXTERNAL_CHECKLIST, AreaType, TestStatus, ChecklistSection, TestItem, PhotoWithCaption } from "@/lib/checklist-data";
 import { useInspection } from "@/lib/inspection-context";
 import * as Haptics from "expo-haptics";
@@ -407,7 +407,8 @@ export default function ChecklistScreen() {
         </View>
       </ScrollView>
 
-      {/* Photo Capture Modal */}
+      {/* Photo Capture Modal - Desabilitado */}
+      {/* 
       <PhotoCaptureModal
         visible={photoModalVisible}
         onClose={() => {
@@ -420,6 +421,7 @@ export default function ChecklistScreen() {
           .find((t) => t.id === selectedTestForPhoto.testId)?.photos || []
           : []}
       />
+      */}
     </ScreenContainer>
   );
 }

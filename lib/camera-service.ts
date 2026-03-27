@@ -1,6 +1,3 @@
-import * as Location from "expo-location";
-import * as ImageManipulator from "expo-image-manipulator";
-
 export interface PhotoMetadata {
   timestamp: string;
   latitude?: number;
@@ -9,37 +6,19 @@ export interface PhotoMetadata {
 }
 
 /**
- * Obtém a localização atual do dispositivo
+ * Obtém a localização atual do dispositivo (offline)
  */
 export async function getCurrentLocation(): Promise<{
   latitude?: number;
   longitude?: number;
   available: boolean;
 }> {
-  try {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      console.warn("Permissão de localização negada");
-      return { available: false };
-    }
-
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
-
-    return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      available: true,
-    };
-  } catch (error) {
-    console.warn("Erro ao obter localização:", error);
-    return { available: false };
-  }
+  // Localização desabilitada - funcionalidade offline
+  return { available: false };
 }
 
 /**
- * Gera metadados de foto com timestamp e GPS
+ * Gera metadados de foto com timestamp
  */
 export async function generatePhotoMetadata(): Promise<PhotoMetadata> {
   const now = new Date();
@@ -64,7 +43,7 @@ export function formatTimestampForFilename(isoTimestamp: string): string {
 }
 
 /**
- * Redimensiona imagem para economizar espaço
+ * Redimensiona imagem para economizar espaço (não implementado)
  */
 export async function compressImage(
   imageUri: string,
@@ -72,21 +51,8 @@ export async function compressImage(
   maxHeight: number = 1920,
   quality: number = 0.8
 ): Promise<string> {
-  try {
-    const result = await ImageManipulator.manipulateAsync(imageUri, [
-      {
-        resize: {
-          width: maxWidth,
-          height: maxHeight,
-        },
-      },
-    ]);
-
-    return result.uri;
-  } catch (error) {
-    console.error("Erro ao comprimir imagem:", error);
-    return imageUri;
-  }
+  // Compressão desabilitada - retorna URI original
+  return imageUri;
 }
 
 /**

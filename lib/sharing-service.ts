@@ -1,55 +1,19 @@
-import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
-import { File, Directory } from "expo-file-system";
 import { Platform } from "react-native";
 
 /**
- * Compartilha um arquivo usando o sistema nativo
+ * Compartilha um arquivo usando o sistema nativo (não implementado)
  */
 export async function shareFile(fileUri: string, fileName: string): Promise<void> {
-  try {
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      console.warn("Compartilhamento não disponível nesta plataforma");
-      return;
-    }
-
-    await Sharing.shareAsync(fileUri, {
-      mimeType: getMimeType(fileName),
-      dialogTitle: "Compartilhar Arquivo",
-      UTI: getUTI(fileName),
-    });
-  } catch (error) {
-    console.error("Erro ao compartilhar arquivo:", error);
-    throw error;
-  }
+  console.warn("Compartilhamento de arquivo não disponível");
+  // Funcionalidade desabilitada
 }
 
 /**
- * Compartilha múltiplos arquivos (pasta)
+ * Compartilha múltiplos arquivos (pasta) (não implementado)
  */
 export async function shareFolder(folderPath: string): Promise<void> {
-  try {
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      console.warn("Compartilhamento não disponível nesta plataforma");
-      return;
-    }
-
-    // No Android/iOS, compartilhamos o arquivo de metadados como representante
-    const metadataFile = new File(folderPath, "metadata.json");
-    try {
-      await Sharing.shareAsync(metadataFile.uri, {
-        mimeType: "application/json",
-        dialogTitle: "Compartilhar Vistoria",
-      });
-    } catch (e) {
-      console.warn("Arquivo de metadados não encontrado");
-    }
-  } catch (error) {
-    console.error("Erro ao compartilhar pasta:", error);
-    throw error;
-  }
+  console.warn("Compartilhamento de pasta não disponível");
+  // Funcionalidade desabilitada
 }
 
 /**
@@ -106,6 +70,5 @@ export async function createInspectionZip(folderPath: string): Promise<string> {
  * Verifica se o compartilhamento está disponível
  */
 export async function isSharingAvailable(): Promise<boolean> {
-  const available = await Sharing.isAvailableAsync();
-  return available === true;
+  return false; // Desabilitado
 }
