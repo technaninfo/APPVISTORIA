@@ -56,6 +56,23 @@ export default function ChecklistScreen() {
     }
   };
 
+  const markAllSectionAsNA = (sectionId: string) => {
+    setSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              tests: section.tests.map((test) => ({ ...test, status: "na" as TestStatus })),
+            }
+          : section
+      )
+    );
+
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  };
+
   const handlePhotoSave = (photos: PhotoWithCaption[]) => {
     if (!selectedTestForPhoto) return;
 
@@ -218,7 +235,21 @@ export default function ChecklistScreen() {
                 {section.tests.filter((t) => t.status !== "pending").length}/{section.tests.length} testes
               </Text>
             </View>
-            <Text className="text-lg text-primary">{isExpanded ? "−" : "+"}</Text>
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={() => markAllSectionAsNA(section.id)}
+                style={({ pressed }) => [{
+                  opacity: pressed ? 0.7 : 1,
+                  backgroundColor: "#9CA3AF",
+                  borderRadius: 6,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                }]}
+              >
+                <Text style={{ color: "white", fontSize: 10, fontWeight: "600" }}>NA</Text>
+              </Pressable>
+              <Text className="text-lg text-primary">{isExpanded ? "−" : "+"}</Text>
+            </View>
           </View>
         </Pressable>
 
@@ -338,7 +369,7 @@ export default function ChecklistScreen() {
                   if (Platform.OS !== "web") {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
-                  router.push("../inspection/room-selection");
+                  router.push("../inspection/rooms-summary");
                 } else {
                   if (Platform.OS !== "web") {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -363,7 +394,7 @@ export default function ChecklistScreen() {
                   if (Platform.OS !== "web") {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
-                  router.push("../inspection/summary");
+                  router.push("../inspection/rooms-summary");
                 }
               }}
               variant="primary"

@@ -38,6 +38,9 @@ export default function ConditionsScreen() {
       }
       return;
     }
+    if (Platform.OS !== "web") {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
     router.push("../inspection/items");
   };
 
@@ -55,45 +58,77 @@ export default function ConditionsScreen() {
           <View className="gap-4">
             <View className="gap-2">
               <Text className="text-sm font-semibold text-foreground">Data da Vistoria *</Text>
-              <Pressable
-                onPress={() => setShowDatePicker(true)}
-                className="bg-surface border border-border rounded-lg p-3"
-              >
-                <Text className="text-base text-foreground">
-                  {state.conditions.date || "Selecione uma data"}
-                </Text>
-              </Pressable>
+              {Platform.OS === "web" ? (
+                <input
+                  type="date"
+                  value={state.conditions.date || ""}
+                  onChange={(e) => updateConditions({ date: e.target.value })}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #e5e7eb",
+                    fontSize: "16px",
+                    fontFamily: "inherit",
+                  }}
+                />
+              ) : (
+                <>
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
+                    className="bg-surface border border-border rounded-lg p-3"
+                  >
+                    <Text className="text-base text-foreground">
+                      {state.conditions.date || "Selecione uma data"}
+                    </Text>
+                  </Pressable>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={state.conditions.date ? new Date(state.conditions.date) : new Date()}
+                      mode="date"
+                      display="spinner"
+                      onChange={handleDateChange}
+                    />
+                  )}
+                </>
+              )}
             </View>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={state.conditions.date ? new Date(state.conditions.date) : new Date()}
-                mode="date"
-                display="spinner"
-                onChange={handleDateChange}
-              />
-            )}
 
             <View className="gap-2">
               <Text className="text-sm font-semibold text-foreground">Hora da Vistoria *</Text>
-              <Pressable
-                onPress={() => setShowTimePicker(true)}
-                className="bg-surface border border-border rounded-lg p-3"
-              >
-                <Text className="text-base text-foreground">
-                  {state.conditions.time || "Selecione uma hora"}
-                </Text>
-              </Pressable>
+              {Platform.OS === "web" ? (
+                <input
+                  type="time"
+                  value={state.conditions.time || ""}
+                  onChange={(e) => updateConditions({ time: e.target.value })}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #e5e7eb",
+                    fontSize: "16px",
+                    fontFamily: "inherit",
+                  }}
+                />
+              ) : (
+                <>
+                  <Pressable
+                    onPress={() => setShowTimePicker(true)}
+                    className="bg-surface border border-border rounded-lg p-3"
+                  >
+                    <Text className="text-base text-foreground">
+                      {state.conditions.time || "Selecione uma hora"}
+                    </Text>
+                  </Pressable>
+                  {showTimePicker && (
+                    <DateTimePicker
+                      value={state.conditions.time ? new Date(`2000-01-01T${state.conditions.time}`) : new Date()}
+                      mode="time"
+                      display="spinner"
+                      onChange={handleTimeChange}
+                    />
+                  )}
+                </>
+              )}
             </View>
-
-            {showTimePicker && (
-              <DateTimePicker
-                value={new Date()}
-                mode="time"
-                display="spinner"
-                onChange={handleTimeChange}
-              />
-            )}
           </View>
 
           {/* Weather */}

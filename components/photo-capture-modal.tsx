@@ -25,6 +25,14 @@ export function PhotoCaptureModal({
   const handlePickImage = async () => {
     try {
       setIsLoading(true);
+      // Solicitar permissão de galeria
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permissão de galeria é necessária");
+        setIsLoading(false);
+        return;
+      }
+      
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
@@ -59,9 +67,18 @@ export function PhotoCaptureModal({
   const handleCapturePhoto = async () => {
     try {
       setIsLoading(true);
+      // Solicitar permissão de câmera
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permissão de câmera é necessária");
+        setIsLoading(false);
+        return;
+      }
+      
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
         quality: 0.8,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
       });
 
       if (!result.canceled && result.assets[0]) {

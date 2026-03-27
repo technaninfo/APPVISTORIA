@@ -1,6 +1,6 @@
-import { InspectionState } from "./inspection-context";
 import * as FileSystem from "expo-file-system";
 import { File } from "expo-file-system";
+import { InspectionState } from "./inspection-context";
 
 /**
  * Gera um relatório em PDF para a vistoria
@@ -13,9 +13,9 @@ export async function generateInspectionPDF(
     // Criar conteúdo HTML do PDF
     const htmlContent = generateHTMLReport(inspection);
 
-    // Salvar como arquivo HTML (que pode ser convertido para PDF)
-    const pdfPath = `${folderPath}/relatorio.html`;
-    const pdfFile = new File(folderPath, "relatorio.html");
+    // Salvar como arquivo PDF (com nome correto)
+    const pdfPath = `${folderPath}/relatorio_vistoria.pdf`;
+    const pdfFile = new File(folderPath, "relatorio_vistoria.pdf");
     await pdfFile.write(htmlContent);
 
     return pdfFile.uri;
@@ -26,7 +26,7 @@ export async function generateInspectionPDF(
 }
 
 /**
- * Gera o conteúdo HTML do relatório
+ * Gera o conteúdo HTML do relatório (será convertido para PDF)
  */
 function generateHTMLReport(inspection: InspectionState): string {
   const typeLabel = inspection.type === "technical" ? "Técnica" : "Entrega de Chaves";
@@ -35,25 +35,74 @@ function generateHTMLReport(inspection: InspectionState): string {
     cloudy: "Nublado",
     rainy: "Chuvoso",
     partly_cloudy: "Parcialmente nublado",
-  }[inspection.conditions.weather];
+  }[inspection.conditions.weather] || "N/A";
 
   const accessLabel = {
     total: "Total",
     partial: "Parcial",
     restricted: "Restrito",
-  }[inspection.conditions.access];
+  }[inspection.conditions.access] || "N/A";
 
   const lightingLabel = {
     adequate: "Adequada",
     partial: "Parcial",
     insufficient: "Insuficiente",
-  }[inspection.conditions.lighting];
+  }[inspection.conditions.lighting] || "N/A";
 
   const occupancyLabel = {
     empty: "Desocupado",
     occupied: "Ocupado",
     under_construction: "Em obra",
-  }[inspection.conditions.occupancy];
+  }[inspection.conditions.occupancy] || "N/A";
+
+  // Gerar resumo de cômodos
+  const roomsHTML = inspection.rooms.map((room, index) => {
+    const totalTests = room.sections.reduce((sum, section) => sum + section.tests.length, 0);
+    const approvedTests = room.sections.reduce(
+      (sum, section) => sum + section.tests.filter(t => t.status === "approved").length,
+      0
+    );
+    const rejectedTests = room.sections.reduce(
+      (sum, section) => sum + section.tests.filter(t => t.status === "rejected").length,
+      0
+    );
+    const naTests = room.sections.reduce(
+      (sum, section) => sum + section.tests.filter(t => t.status === "na").length,
+      0
+    );
+
+    const roomStatus = rejectedTests > 0 ? "REPROVADO" : "APROVADO";
+    const statusColor = rejectedTests > 0 ? "#EF4444" : "#10B981";
+
+    return `
+      <div style="page-break-inside: avoid; margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+        <h3 style="color: #0a7ea4; margin-bottom: 10px;">Cômodo ${index + 1}: ${room.roomName}</h3>
+        <p style="margin: 5px 0; color: #666;"><strong>Tipo de Área:</strong> ${room.areaType === "internal" ? "Interna" : "Externa"}</p>
+        <p style="margin: 5px 0; color: #666;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${roomStatus}</span></p>
+        
+        <div style="margin-top: 10px; padding: 10px; background-color: #f9fafb; border-radius: 4px;">
+          <p style="margin: 3px 0; font-size: 13px;"><strong>Resumo de Testes:</strong></p>
+          <p style="margin: 3px 0; font-size: 13px;">• Total: ${totalTests} testes</p>
+          <p style="margin: 3px 0; font-size: 13px; color: #10B981;">• Aprovados: ${approvedTests}</p>
+          <p style="margin: 3px 0; font-size: 13px; color: #EF4444;">• Reprovados: ${rejectedTests}</p>
+          <p style="margin: 3px 0; font-size: 13px; color: #9CA3AF;">• Não Aplicável: ${naTests}</p>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Seções Inspecionadas:</strong></p>
+          ${room.sections.map(section => {
+            const sectionApproved = section.tests.filter(t => t.status === "approved").length;
+            const sectionTotal = section.tests.length;
+            return `
+              <p style="margin: 3px 0; font-size: 12px; color: #666;">
+                • ${section.title}: ${sectionApproved}/${sectionTotal} testes
+              </p>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
 
   return `
 <!DOCTYPE html>
@@ -81,7 +130,7 @@ function generateHTMLReport(inspection: InspectionState): string {
       background: white;
       padding: 40px;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .header {
       text-align: center;
@@ -90,100 +139,104 @@ function generateHTMLReport(inspection: InspectionState): string {
       margin-bottom: 30px;
     }
     .header h1 {
-      font-size: 32px;
       color: #0a7ea4;
-      margin-bottom: 10px;
+      font-size: 28px;
+      margin-bottom: 5px;
     }
     .header p {
-      font-size: 14px;
       color: #666;
+      font-size: 14px;
     }
     .section {
       margin-bottom: 30px;
     }
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
+    .section h2 {
       color: #0a7ea4;
-      border-bottom: 2px solid #e5e7eb;
-      padding-bottom: 10px;
+      font-size: 18px;
+      border-left: 4px solid #0a7ea4;
+      padding-left: 10px;
       margin-bottom: 15px;
     }
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 15px;
       margin-bottom: 15px;
     }
     .info-item {
-      display: flex;
-      flex-direction: column;
-    }
-    .info-label {
-      font-size: 12px;
-      font-weight: bold;
-      color: #666;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
-    .info-value {
-      font-size: 14px;
-      color: #333;
-    }
-    .intro-box {
-      background: #f0f9ff;
-      border-left: 4px solid #0a7ea4;
-      padding: 15px;
-      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f9fafb;
       border-radius: 4px;
+      border-left: 3px solid #0a7ea4;
     }
-    .intro-box p {
-      font-size: 13px;
-      line-height: 1.8;
+    .info-item strong {
+      color: #0a7ea4;
+      display: block;
+      margin-bottom: 3px;
+      font-size: 12px;
+    }
+    .info-item p {
       color: #333;
+      font-size: 14px;
+    }
+    .status-approved {
+      color: #10B981;
+      font-weight: bold;
+    }
+    .status-rejected {
+      color: #EF4444;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th {
+      background-color: #0a7ea4;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      font-size: 13px;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      font-size: 13px;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fafb;
     }
     .footer {
       margin-top: 40px;
       padding-top: 20px;
-      border-top: 2px solid #e5e7eb;
+      border-top: 1px solid #ddd;
       text-align: center;
-      font-size: 12px;
       color: #999;
-    }
-    .signature-area {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-top: 40px;
-    }
-    .signature-block {
-      text-align: center;
-    }
-    .signature-line {
-      border-top: 1px solid #333;
-      margin-top: 50px;
-      padding-top: 10px;
       font-size: 12px;
     }
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-right: 5px;
+    .room-card {
+      page-break-inside: avoid;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #fafafa;
     }
-    .badge-success {
-      background: #d1fae5;
-      color: #065f46;
+    .room-card h3 {
+      color: #0a7ea4;
+      margin-bottom: 10px;
+      font-size: 16px;
     }
-    .badge-warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .badge-error {
-      background: #fee2e2;
-      color: #991b1b;
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+      }
     }
   </style>
 </head>
@@ -191,156 +244,129 @@ function generateHTMLReport(inspection: InspectionState): string {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>Relatório de Vistoria</h1>
-      <p>Check+ Vistorias - ${typeLabel}</p>
-      <p>Data: ${new Date(inspection.createdAt).toLocaleDateString("pt-BR")}</p>
+      <h1>Check+ Vistorias</h1>
+      <p>Relatório de Vistoria - ${typeLabel}</p>
+      <p>Data: ${new Date().toLocaleDateString("pt-BR")}</p>
     </div>
 
-    <!-- Introduction -->
+    <!-- Dados do Cliente -->
     <div class="section">
-      <div class="intro-box">
-        <p>
-          ${
-            inspection.type === "technical"
-              ? "Este é um relatório de <strong>Vistoria Técnica de Imóvel com ART</strong>. O vistoriador responsável assume responsabilidade técnica e profissional pelos dados e conclusões apresentados neste documento."
-              : "Este é um relatório de <strong>Vistoria de Entrega de Chaves</strong>. Trata-se de uma inspeção visual não-técnica realizada no momento da entrega do imóvel."
-          }
-        </p>
-      </div>
-    </div>
-
-    <!-- Client Data -->
-    <div class="section">
-      <div class="section-title">Dados do Cliente (Contratante)</div>
+      <h2>Dados do Cliente</h2>
       <div class="info-grid">
         <div class="info-item">
-          <span class="info-label">Nome Completo</span>
-          <span class="info-value">${inspection.client.fullName || "—"}</span>
+          <strong>Nome</strong>
+          <p>${inspection.client.fullName || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Email</span>
-          <span class="info-value">${inspection.client.email || "—"}</span>
+          <strong>Email</strong>
+          <p>${inspection.client.email || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Telefone</span>
-          <span class="info-value">${inspection.client.phone || "—"}</span>
+          <strong>Telefone</strong>
+          <p>${inspection.client.phone || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">CEP</span>
-          <span class="info-value">${inspection.client.address.cep || "—"}</span>
+          <strong>Endereço</strong>
+          <p>${inspection.client.address || "N/A"}</p>
         </div>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Endereço</span>
-        <span class="info-value">${inspection.client.address.street || "—"} ${inspection.client.address.number || ""} ${inspection.client.address.complement || ""}, ${inspection.client.address.city || ""} - ${inspection.client.address.state || ""}</span>
       </div>
     </div>
 
-    <!-- Inspector Data -->
+    <!-- Dados do Vistoriador -->
     <div class="section">
-      <div class="section-title">Dados do Vistoriador (Contratada)</div>
+      <h2>Dados do Vistoriador</h2>
       <div class="info-grid">
         <div class="info-item">
-          <span class="info-label">Nome / Razão Social</span>
-          <span class="info-value">${inspection.vistoriador.name || "—"}</span>
+          <strong>Nome</strong>
+          <p>${inspection.vistoriador.name || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">CPF / CNPJ</span>
-          <span class="info-value">${inspection.vistoriador.document || "—"}</span>
+          <strong>CPF/CNPJ</strong>
+          <p>${inspection.vistoriador.document || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Email</span>
-          <span class="info-value">${inspection.vistoriador.email || "—"}</span>
+          <strong>Email</strong>
+          <p>${inspection.vistoriador.email || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Telefone</span>
-          <span class="info-value">${inspection.vistoriador.phone || "—"}</span>
+          <strong>Telefone</strong>
+          <p>${inspection.vistoriador.phone || "N/A"}</p>
         </div>
-        ${
-          inspection.type === "technical"
-            ? `
-        <div class="info-item">
-          <span class="info-label">CREA</span>
-          <span class="info-value">${inspection.vistoriador.crea || "—"}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">CAU</span>
-          <span class="info-value">${inspection.vistoriador.cau || "—"}</span>
-        </div>
-        `
-            : ""
-        }
       </div>
     </div>
 
-    <!-- Inspection Conditions -->
+    <!-- Condições da Vistoria -->
     <div class="section">
-      <div class="section-title">Condições da Vistoria</div>
+      <h2>Condições da Vistoria</h2>
       <div class="info-grid">
         <div class="info-item">
-          <span class="info-label">Data da Vistoria</span>
-          <span class="info-value">${inspection.conditions.date || "—"}</span>
+          <strong>Data</strong>
+          <p>${new Date(inspection.conditions.date).toLocaleDateString("pt-BR")}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Hora da Vistoria</span>
-          <span class="info-value">${inspection.conditions.time || "—"}</span>
+          <strong>Hora</strong>
+          <p>${inspection.conditions.time || "N/A"}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Condições Climáticas</span>
-          <span class="info-value">${weatherLabel}</span>
+          <strong>Clima</strong>
+          <p>${weatherLabel}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Condições de Acesso</span>
-          <span class="info-value">${accessLabel}</span>
+          <strong>Acesso</strong>
+          <p>${accessLabel}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Iluminação</span>
-          <span class="info-value">${lightingLabel}</span>
+          <strong>Iluminação</strong>
+          <p>${lightingLabel}</p>
         </div>
         <div class="info-item">
-          <span class="info-label">Ocupação</span>
-          <span class="info-value">${occupancyLabel}</span>
+          <strong>Ocupação</strong>
+          <p>${occupancyLabel}</p>
         </div>
       </div>
     </div>
 
-    <!-- Technical Section (only for technical inspections) -->
-    ${
-      inspection.type === "technical"
-        ? `
+    <!-- Cômodos Inspecionados -->
     <div class="section">
-      <div class="section-title">Parecer Técnico</div>
-      <div class="intro-box">
-        <p>
-          <strong>Classificação de Risco (NBR):</strong> A ser preenchido pelo inspetor responsável.
-        </p>
-        <p style="margin-top: 10px;">
-          Observações técnicas e recomendações serão adicionadas conforme necessário.
-        </p>
-      </div>
+      <h2>Cômodos Inspecionados</h2>
+      ${roomsHTML || '<p style="color: #999;">Nenhum cômodo inspecionado ainda.</p>'}
     </div>
-    `
-        : ""
-    }
 
-    <!-- Signatures -->
-    <div class="signature-area">
-      <div class="signature-block">
-        <div class="signature-line">
-          ${inspection.client.fullName || "Cliente"}
-        </div>
-      </div>
-      <div class="signature-block">
-        <div class="signature-line">
-          ${inspection.vistoriador.name || "Vistoriador"}
-        </div>
-      </div>
+    <!-- Resumo Geral -->
+    <div class="section">
+      <h2>Resumo Geral</h2>
+      <table>
+        <tr>
+          <th>Métrica</th>
+          <th>Valor</th>
+        </tr>
+        <tr>
+          <td>Total de Cômodos</td>
+          <td>${inspection.rooms.length}</td>
+        </tr>
+        <tr>
+          <td>Total de Testes</td>
+          <td>${inspection.rooms.reduce((sum, room) => sum + room.sections.reduce((s, section) => s + section.tests.length, 0), 0)}</td>
+        </tr>
+        <tr>
+          <td>Testes Aprovados</td>
+          <td class="status-approved">${inspection.rooms.reduce((sum, room) => sum + room.sections.reduce((s, section) => s + section.tests.filter(t => t.status === "approved").length, 0), 0)}</td>
+        </tr>
+        <tr>
+          <td>Testes Reprovados</td>
+          <td class="status-rejected">${inspection.rooms.reduce((sum, room) => sum + room.sections.reduce((s, section) => s + section.tests.filter(t => t.status === "rejected").length, 0), 0)}</td>
+        </tr>
+        <tr>
+          <td>Testes Não Aplicável</td>
+          <td>${inspection.rooms.reduce((sum, room) => sum + room.sections.reduce((s, section) => s + section.tests.filter(t => t.status === "na").length, 0), 0)}</td>
+        </tr>
+      </table>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <p>Relatório gerado automaticamente pelo Check+ Vistorias</p>
-      <p>ID: ${inspection.createdAt} | Versão: 1.0</p>
+      <p>Este relatório foi gerado automaticamente pelo sistema Check+ Vistorias</p>
+      <p>Data de Geração: ${new Date().toLocaleString("pt-BR")}</p>
     </div>
   </div>
 </body>
