@@ -17,8 +17,31 @@ export default function ClientDataScreen() {
   const [showToast, setShowToast] = useState(false);
 
   const handleNext = async () => {
-    // Permitir prosseguir sem validações obrigatórias
-    // Usuário pode preencher dados gradualmente
+    // Validar campos obrigatórios
+    if (
+      !state.client.fullName ||
+      !state.client.email ||
+      !state.client.phone ||
+      !state.client.address.street ||
+      !state.client.address.number ||
+      !state.vistoriador.name ||
+      !state.vistoriador.document ||
+      !state.vistoriador.email ||
+      !state.vistoriador.phone
+    ) {
+      if (Platform.OS !== "web") {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
+
+    // Para vistoria técnica, exigir CREA OU CAU (não ambos)
+    if (state.type === "technical" && !state.vistoriador.crea && !state.vistoriador.cau) {
+      if (Platform.OS !== "web") {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
 
     if (Platform.OS !== "web") {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -52,12 +75,14 @@ export default function ClientDataScreen() {
               placeholder="Ex: João Silva"
               value={state.client.fullName}
               onChangeText={(text) => updateClient({ fullName: text })}
+              required
             />
             <FormInput
               label="Rua"
               placeholder="Ex: Rua das Flores"
               value={state.client.address.street}
               onChangeText={(text) => updateClient({ address: { ...state.client.address, street: text } })}
+              required
             />
             <View className="flex-row gap-3">
               <View className="flex-1">
@@ -67,6 +92,7 @@ export default function ClientDataScreen() {
                   value={state.client.address.number}
                   onChangeText={(text) => updateClient({ address: { ...state.client.address, number: text } })}
                   keyboardType="numeric"
+                  required
                 />
               </View>
               <View className="flex-1">
@@ -116,6 +142,7 @@ export default function ClientDataScreen() {
               value={state.client.email}
               onChangeText={(text) => updateClient({ email: text })}
               keyboardType="email-address"
+              required
             />
             <FormInput
               label="Telefone"
@@ -123,6 +150,7 @@ export default function ClientDataScreen() {
               value={state.client.phone}
               onChangeText={(text) => updateClient({ phone: text })}
               keyboardType="phone-pad"
+              required
             />
           </View>
 
@@ -134,6 +162,7 @@ export default function ClientDataScreen() {
               placeholder="Ex: João Vistoriador ou Empresa XYZ"
               value={state.vistoriador.name}
               onChangeText={(text) => updateVistoriador({ name: text })}
+              required
             />
             <FormInput
               label="CPF/CNPJ"
@@ -142,6 +171,7 @@ export default function ClientDataScreen() {
               onChangeText={(text) => updateVistoriador({ document: text })}
               keyboardType="numeric"
               mask={formatCPF}
+              required
             />
             <FormInput
               label="Rua"
@@ -206,6 +236,7 @@ export default function ClientDataScreen() {
               value={state.vistoriador.email}
               onChangeText={(text) => updateVistoriador({ email: text })}
               keyboardType="email-address"
+              required
             />
             <FormInput
               label="Telefone"
@@ -213,6 +244,7 @@ export default function ClientDataScreen() {
               value={state.vistoriador.phone}
               onChangeText={(text) => updateVistoriador({ phone: text })}
               keyboardType="phone-pad"
+              required
             />
           </View>
 
