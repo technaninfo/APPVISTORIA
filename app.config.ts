@@ -94,6 +94,18 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     [
+      "expo-camera",
+      {
+        cameraPermission: "Allow $(PRODUCT_NAME) to access your camera.",
+      },
+    ],
+    [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission: "Allow $(PRODUCT_NAME) to access your location.",
+      },
+    ],
+    [
       "expo-audio",
       {
         microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",

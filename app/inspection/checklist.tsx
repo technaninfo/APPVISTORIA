@@ -3,18 +3,16 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { LargeButton } from "@/components/large-button";
-
+import { PhotoCaptureModal } from "@/components/photo-capture-modal";
 import { INTERNAL_CHECKLIST, EXTERNAL_CHECKLIST, AreaType, TestStatus, ChecklistSection, TestItem, PhotoWithCaption } from "@/lib/checklist-data";
-import { useInspection } from "@/lib/inspection-context";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
 export default function ChecklistScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { addRoom } = useInspection();
   const areaType = (params.areaType as AreaType) || "internal";
-  const roomName = (Array.isArray(params.roomName) ? params.roomName[0] : params.roomName) || "Cômodo";
+  const roomName = params.roomName || "Cômodo";
 
   const [sections, setSections] = useState<ChecklistSection[]>(
     areaType === "internal" ? INTERNAL_CHECKLIST : EXTERNAL_CHECKLIST
@@ -53,23 +51,6 @@ export default function ChecklistScreen() {
 
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-  };
-
-  const markAllSectionAsNA = (sectionId: string) => {
-    setSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              tests: section.tests.map((test) => ({ ...test, status: "na" as TestStatus })),
-            }
-          : section
-      )
-    );
-
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   };
 
@@ -235,21 +216,7 @@ export default function ChecklistScreen() {
                 {section.tests.filter((t) => t.status !== "pending").length}/{section.tests.length} testes
               </Text>
             </View>
-            <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={() => markAllSectionAsNA(section.id)}
-                style={({ pressed }) => [{
-                  opacity: pressed ? 0.7 : 1,
-                  backgroundColor: "#9CA3AF",
-                  borderRadius: 6,
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                }]}
-              >
-                <Text style={{ color: "white", fontSize: 10, fontWeight: "600" }}>NA</Text>
-              </Pressable>
-              <Text className="text-lg text-primary">{isExpanded ? "−" : "+"}</Text>
-            </View>
+            <Text className="text-lg text-primary">{isExpanded ? "−" : "+"}</Text>
           </View>
         </Pressable>
 
@@ -276,7 +243,7 @@ export default function ChecklistScreen() {
           <View className="gap-2">
             <Text className="text-2xl font-bold text-foreground">Checklist</Text>
             <Text className="text-sm text-muted">
-              {areaType === "internal" ? "Área Interna" : "Área Externa"} - {String(roomName)}
+              {areaType === "internal" ? "Área Interna" : "Área Externa"} - {roomName}
             </Text>
           </View>
 
@@ -356,47 +323,12 @@ export default function ChecklistScreen() {
           <View className="gap-3 mt-4">
             <LargeButton
               title="Adicionar Novo Cômodo"
-              onPress={() => {
-                if (allTestsFilled) {
-                  addRoom({
-                    id: `room_${Date.now()}`,
-                    roomName,
-                    areaType,
-                    sections,
-                    memorialAvailable,
-                    projectAvailable,
-                  });
-                  if (Platform.OS !== "web") {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }
-                  router.push("../inspection/rooms-summary");
-                } else {
-                  if (Platform.OS !== "web") {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                  }
-                }
-              }}
+              onPress={() => router.push("../inspection/room-selection")}
               variant="secondary"
-              disabled={!allTestsFilled}
             />
             <LargeButton
               title="Finalizar Vistoria"
-              onPress={() => {
-                if (allTestsFilled) {
-                  addRoom({
-                    id: `room_${Date.now()}`,
-                    roomName,
-                    areaType,
-                    sections,
-                    memorialAvailable,
-                    projectAvailable,
-                  });
-                  if (Platform.OS !== "web") {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }
-                  router.push("../inspection/rooms-summary");
-                }
-              }}
+              onPress={() => router.push("../inspection/summary")}
               variant="primary"
               disabled={!allTestsFilled}
             />
@@ -407,8 +339,7 @@ export default function ChecklistScreen() {
         </View>
       </ScrollView>
 
-      {/* Photo Capture Modal - Desabilitado */}
-      {/* 
+      {/* Photo Capture Modal */}
       <PhotoCaptureModal
         visible={photoModalVisible}
         onClose={() => {
@@ -421,7 +352,6 @@ export default function ChecklistScreen() {
           .find((t) => t.id === selectedTestForPhoto.testId)?.photos || []
           : []}
       />
-      */}
     </ScreenContainer>
   );
 }

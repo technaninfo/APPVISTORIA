@@ -9,8 +9,7 @@ export default function ItemsScreen() {
   const { state } = useInspection();
 
   const handleNext = () => {
-    // Redirecionar para seleção de cômodo (checklist dinâmico)
-    router.push("../inspection/room-selection");
+    router.push("../inspection/summary");
   };
 
   return (
@@ -23,17 +22,17 @@ export default function ItemsScreen() {
             <Text className="text-sm text-muted">Etapa 3 de 4</Text>
           </View>
 
-          {/* Info Section */}
+          {/* Placeholder Section */}
           <View className="flex-1 items-center justify-center gap-4">
             <View className="w-16 h-16 bg-surface rounded-full items-center justify-center border border-border">
-              <Text className="text-2xl">✓</Text>
+              <Text className="text-2xl">📋</Text>
             </View>
             <View className="items-center gap-2">
               <Text className="text-lg font-semibold text-foreground text-center">
-                Inspeção de Cômodos
+                Itens em Breve
               </Text>
               <Text className="text-sm text-muted text-center leading-relaxed">
-                Agora você vai inspecionar cada cômodo do imóvel. Selecione o tipo de área (interna/externa) e o cômodo para começar o checklist.
+                Os itens de vistoria serão definidos posteriormente. Por enquanto, você pode prosseguir para o resumo.
               </Text>
             </View>
           </View>
@@ -41,7 +40,7 @@ export default function ItemsScreen() {
           {/* Info Box */}
           <View className="bg-surface rounded-2xl p-4 border border-border">
             <Text className="text-xs text-muted leading-relaxed">
-              ℹ️ Para cada cômodo, você poderá marcar testes como Aprovado (✓), Reprovado (✕) ou Não Aplicável (NA), além de adicionar fotos e descrições.
+              ℹ️ Quando os itens estiverem disponíveis, você poderá adicionar fotos, status (Aprovado/Reprovado/NA) e descrições para cada um.
             </Text>
           </View>
 
