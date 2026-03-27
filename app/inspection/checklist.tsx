@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { LargeButton } from "@/components/large-button";
 import { PhotoCaptureModal } from "@/components/photo-capture-modal";
+import { AddCustomItemModal } from "@/components/add-custom-item-modal";
 import { INTERNAL_CHECKLIST, EXTERNAL_CHECKLIST, AreaType, TestStatus, ChecklistSection, TestItem, PhotoWithCaption } from "@/lib/checklist-data";
 import { useInspection } from "@/lib/inspection-context";
 import * as Haptics from "expo-haptics";
@@ -24,6 +25,7 @@ export default function ChecklistScreen() {
   const [projectAvailable, setProjectAvailable] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [selectedTestForPhoto, setSelectedTestForPhoto] = useState<{ sectionId: string; testId: string } | null>(null);
+  const [customItemModalVisible, setCustomItemModalVisible] = useState(false);
 
   // Verificar se todos os testes foram preenchidos
   const allTestsFilled = sections.every((section) =>
@@ -70,6 +72,28 @@ export default function ChecklistScreen() {
 
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  };
+
+  const handleAddCustomItem = (itemName: string, testDescription: string) => {
+    const customSection: ChecklistSection = {
+      id: `custom_${Date.now()}`,
+      title: itemName,
+      tests: [
+        {
+          id: `test_${Date.now()}`,
+          description: testDescription,
+          status: "pending",
+          photos: [],
+        },
+      ],
+    };
+
+    setSections([...sections, customSection]);
+    setCustomItemModalVisible(false);
+
+    if (Platform.OS !== "web") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
   };
 
@@ -352,6 +376,23 @@ export default function ChecklistScreen() {
             </View>
           )}
 
+          {/* Custom Item Button */}
+          <Pressable
+            onPress={() => setCustomItemModalVisible(true)}
+            style={({ pressed }) => [{
+              opacity: pressed ? 0.7 : 1,
+              backgroundColor: "#f3f4f6",
+              borderWidth: 2,
+              borderColor: "#10B981",
+              borderRadius: 12,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              marginBottom: 12,
+            }]}
+          >
+            <Text className="text-center text-green-700 font-semibold">+ Adicionar Item Customizado</Text>
+          </Pressable>
+
           {/* Navigation Buttons */}
           <View className="gap-3 mt-4">
             <LargeButton
@@ -419,6 +460,13 @@ export default function ChecklistScreen() {
           .find((s) => s.id === selectedTestForPhoto.sectionId)?.tests
           .find((t) => t.id === selectedTestForPhoto.testId)?.photos || []
           : []}
+      />
+
+      {/* Add Custom Item Modal */}
+      <AddCustomItemModal
+        visible={customItemModalVisible}
+        onClose={() => setCustomItemModalVisible(false)}
+        onAdd={handleAddCustomItem}
       />
     </ScreenContainer>
   );

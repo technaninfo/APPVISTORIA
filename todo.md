@@ -168,3 +168,11 @@
 - [x] Corrigir captura de galeria - deve abrir galeria, não câmera
 - [x] Implementar exportação de PDF no final da vistoria
 - [ ] Testar fluxo completo com múltiplos cômodos e exportação de PDF
+
+
+## Fase 18: Correção de Captura de Câmera e Novos Itens/Testes
+- [x] Corrigir problema de fotos da câmera não serem salvas (melhorado tratamento de assets)
+- [x] Implementar opção de adicionar novos itens de vistoria customizados
+- [x] Implementar opção de adicionar novos testes aos itens existentes
+- [ ] Testar captura de câmera com envio de fotos
+- [ ] Testar criação de novos itens e testes
