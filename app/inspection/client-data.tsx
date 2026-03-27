@@ -1,142 +1,255 @@
-import { ScrollView, Text, View, TouchableOpacity, TextInput } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
-import { useInspection, type InspectionType, type ClientData } from "@/lib/inspection-context";
+import { ScrollView, View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import { useState } from "react";
+import { ScreenContainer } from "@/components/screen-container";
+import { FormInput } from "@/components/form-input";
+import { LargeButton } from "@/components/large-button";
+import { Toast } from "@/components/toast";
+import { useInspection } from "@/lib/inspection-context";
+import { useCPFMask } from "@/hooks/use-cpf-mask";
+import * as Haptics from "expo-haptics";
+import { Platform } from "react-native";
 
 export default function ClientDataScreen() {
   const router = useRouter();
-  const { type } = useLocalSearchParams<{ type: InspectionType }>();
-  const { setInspection } = useInspection();
+  const { state, updateClient, updateVistoriador } = useInspection();
+  const { formatCPF } = useCPFMask();
+  const [showToast, setShowToast] = useState(false);
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [cpf, setCpf] = useState("");
+  const handleNext = async () => {
+    // Permitir prosseguir sem validações obrigatórias
+    // Usuário pode preencher dados gradualmente
 
-  const handleContinue = () => {
-    if (!name.trim() || !phone.trim()) {
-      alert("Por favor, preencha nome e telefone");
-      return;
+    if (Platform.OS !== "web") {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-
-    const clientData: ClientData = {
-      name: name.trim(),
-      phone: phone.trim(),
-      email: email.trim(),
-      cpf: cpf.trim() || undefined,
-    };
-
-    // Inicializar inspeção com dados do cliente
-    setInspection({
-      type: type || "simple",
-      clientData,
-      rooms: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-
-    // Navegar para próxima tela baseado no tipo
-    if (type === "technical") {
-      router.push("/inspection/technical-data");
-    } else if (type === "rental") {
-      router.push("/inspection/rental-data");
-    } else {
-      router.push("/inspection/conditions");
-    }
+    setShowToast(true);
+    setTimeout(() => {
+      router.push("../inspection/conditions");
+    }, 500);
   };
 
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-6">
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }} 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+      >
+        <View className="gap-6 pb-6">
           {/* Header */}
-          <View className="items-center gap-2">
-            <Text className="text-3xl font-bold text-foreground">Dados do Cliente</Text>
-            <Text className="text-sm text-muted text-center">
-              Etapa 1 - Preencha as informações do cliente
-            </Text>
+          <View className="gap-2">
+            <Text className="text-2xl font-bold text-foreground">Dados da Vistoria</Text>
+            <Text className="text-sm text-muted">Etapa 1 de 4</Text>
           </View>
 
-          {/* Form Fields */}
+          {/* Client Section */}
           <View className="gap-4">
-            {/* Nome */}
-            <View className="gap-2">
-              <Text className="text-sm font-semibold text-foreground">Nome *</Text>
-              <TextInput
-                placeholder="Nome completo do cliente"
-                value={name}
-                onChangeText={setName}
-                placeholderTextColor="#999"
-                className="border border-border rounded-lg p-3 text-foreground bg-surface"
-              />
+            <Text className="text-lg font-semibold text-foreground">Cliente (Contratante)</Text>
+            <FormInput
+              label="Nome Completo"
+              placeholder="Ex: João Silva"
+              value={state.client.fullName}
+              onChangeText={(text) => updateClient({ fullName: text })}
+            />
+            <FormInput
+              label="Rua"
+              placeholder="Ex: Rua das Flores"
+              value={state.client.address.street}
+              onChangeText={(text) => updateClient({ address: { ...state.client.address, street: text } })}
+            />
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <FormInput
+                  label="Número"
+                  placeholder="Ex: 123"
+                  value={state.client.address.number}
+                  onChangeText={(text) => updateClient({ address: { ...state.client.address, number: text } })}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View className="flex-1">
+                <FormInput
+                  label="Complemento"
+                  placeholder="Ex: Apt 42"
+                  value={state.client.address.complement}
+                  onChangeText={(text) => updateClient({ address: { ...state.client.address, complement: text } })}
+                />
+              </View>
             </View>
+            <FormInput
+              label="Bairro"
+              placeholder="Ex: Centro"
+              value={state.client.address.neighborhood}
+              onChangeText={(text) => updateClient({ address: { ...state.client.address, neighborhood: text } })}
+            />
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <FormInput
+                  label="Cidade"
+                  placeholder="Ex: São Paulo"
+                  value={state.client.address.city}
+                  onChangeText={(text) => updateClient({ address: { ...state.client.address, city: text } })}
+                />
+              </View>
+              <View className="flex-0.3">
+                <FormInput
+                  label="UF"
+                  placeholder="SP"
+                  value={state.client.address.state}
+                  onChangeText={(text) => updateClient({ address: { ...state.client.address, state: text.toUpperCase() } })}
 
-            {/* Telefone */}
-            <View className="gap-2">
-              <Text className="text-sm font-semibold text-foreground">Telefone *</Text>
-              <TextInput
-                placeholder="(XX) XXXXX-XXXX"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                placeholderTextColor="#999"
-                className="border border-border rounded-lg p-3 text-foreground bg-surface"
-              />
+                />
+              </View>
             </View>
-
-            {/* Email */}
-            <View className="gap-2">
-              <Text className="text-sm font-semibold text-foreground">Email</Text>
-              <TextInput
-                placeholder="email@exemplo.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                placeholderTextColor="#999"
-                className="border border-border rounded-lg p-3 text-foreground bg-surface"
-              />
-            </View>
-
-            {/* CPF */}
-            <View className="gap-2">
-              <Text className="text-sm font-semibold text-foreground">CPF</Text>
-              <TextInput
-                placeholder="XXX.XXX.XXX-XX"
-                value={cpf}
-                onChangeText={setCpf}
-                keyboardType="number-pad"
-                placeholderTextColor="#999"
-                className="border border-border rounded-lg p-3 text-foreground bg-surface"
-              />
-            </View>
+            <FormInput
+              label="CEP"
+              placeholder="Ex: 12345-678"
+              value={state.client.address.cep}
+              onChangeText={(text) => updateClient({ address: { ...state.client.address, cep: text } })}
+              keyboardType="numeric"
+            />
+            <FormInput
+              label="Email"
+              placeholder="Ex: joao@email.com"
+              value={state.client.email}
+              onChangeText={(text) => updateClient({ email: text })}
+              keyboardType="email-address"
+            />
+            <FormInput
+              label="Telefone"
+              placeholder="Ex: (11) 99999-9999"
+              value={state.client.phone}
+              onChangeText={(text) => updateClient({ phone: text })}
+              keyboardType="phone-pad"
+            />
           </View>
 
-          {/* Info Box */}
-          <View className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <Text className="text-xs text-blue-900">
-              💡 <Text className="font-semibold">Dica:</Text> Os campos marcados com * são obrigatórios.
-            </Text>
+          {/* Vistoriador Section */}
+          <View className="gap-4">
+            <Text className="text-lg font-semibold text-foreground">Vistoriador (Contratada)</Text>
+            <FormInput
+              label="Nome / Razão Social"
+              placeholder="Ex: João Vistoriador ou Empresa XYZ"
+              value={state.vistoriador.name}
+              onChangeText={(text) => updateVistoriador({ name: text })}
+            />
+            <FormInput
+              label="CPF/CNPJ"
+              placeholder="Ex: 123.456.789-00"
+              value={state.vistoriador.document}
+              onChangeText={(text) => updateVistoriador({ document: text })}
+              keyboardType="numeric"
+              mask={formatCPF}
+            />
+            <FormInput
+              label="Rua"
+              placeholder="Ex: Rua das Flores"
+              value={state.vistoriador.address.street}
+              onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, street: text } })}
+            />
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <FormInput
+                  label="Número"
+                  placeholder="Ex: 123"
+                  value={state.vistoriador.address.number}
+                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, number: text } })}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View className="flex-1">
+                <FormInput
+                  label="Complemento"
+                  placeholder="Ex: Apt 42"
+                  value={state.vistoriador.address.complement}
+                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, complement: text } })}
+                />
+              </View>
+            </View>
+            <FormInput
+              label="Bairro"
+              placeholder="Ex: Centro"
+              value={state.vistoriador.address.neighborhood}
+              onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, neighborhood: text } })}
+            />
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <FormInput
+                  label="Cidade"
+                  placeholder="Ex: São Paulo"
+                  value={state.vistoriador.address.city}
+                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, city: text } })}
+                />
+              </View>
+              <View className="flex-0.3">
+                <FormInput
+                  label="UF"
+                  placeholder="SP"
+                  value={state.vistoriador.address.state}
+                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, state: text.toUpperCase() } })}
+
+                />
+              </View>
+            </View>
+            <FormInput
+              label="CEP"
+              placeholder="Ex: 12345-678"
+              value={state.vistoriador.address.cep}
+              onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, cep: text } })}
+              keyboardType="numeric"
+            />
+            <FormInput
+              label="Email"
+              placeholder="Ex: vistoriador@email.com"
+              value={state.vistoriador.email}
+              onChangeText={(text) => updateVistoriador({ email: text })}
+              keyboardType="email-address"
+            />
+            <FormInput
+              label="Telefone"
+              placeholder="Ex: (11) 99999-9999"
+              value={state.vistoriador.phone}
+              onChangeText={(text) => updateVistoriador({ phone: text })}
+              keyboardType="phone-pad"
+            />
           </View>
 
-          {/* Buttons */}
-          <View className="gap-3 mt-auto">
-            <TouchableOpacity
-              onPress={handleContinue}
-              className="w-full bg-primary px-6 py-4 rounded-lg active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-white">Continuar</Text>
-            </TouchableOpacity>
+          {/* Technical Section (only for technical inspections) */}
+          {state.type === "technical" && (
+            <View className="gap-4">
+              <Text className="text-lg font-semibold text-foreground">Dados Técnicos</Text>
+              <FormInput
+                label="CREA (ou deixe em branco se tiver CAU)"
+                placeholder="Ex: 12345/D-SP"
+                value={state.vistoriador.crea || ""}
+                onChangeText={(text) => updateVistoriador({ crea: text })}
+              />
+              <FormInput
+                label="CAU (ou deixe em branco se tiver CREA)"
+                placeholder="Ex: 123456"
+                value={state.vistoriador.cau || ""}
+                onChangeText={(text) => updateVistoriador({ cau: text })}
+              />
+            </View>
+          )}
 
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">Voltar</Text>
-            </TouchableOpacity>
+          {/* Navigation Buttons */}
+          <View className="gap-3 mt-4">
+            <LargeButton title="Próximo" onPress={handleNext} variant="primary" />
+            <Pressable onPress={() => router.back()}>
+              <Text className="text-center text-primary font-semibold">Voltar</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
+      <Toast 
+        message="Dados salvos com sucesso!" 
+        type="success" 
+        visible={showToast} 
+        onHide={() => setShowToast(false)} 
+      />
     </ScreenContainer>
   );
 }

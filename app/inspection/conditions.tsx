@@ -1,127 +1,193 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { ScrollView, View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { SegmentedControl } from "@/components/segmented-control";
+import { LargeButton } from "@/components/large-button";
 import { useInspection } from "@/lib/inspection-context";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useState } from "react";
+import * as Haptics from "expo-haptics";
+import { Platform } from "react-native";
 
 export default function ConditionsScreen() {
   const router = useRouter();
-  const { inspection } = useInspection();
+  const { state, updateConditions } = useInspection();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const handleStartInspection = () => {
-    router.push("/inspection/room-select");
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const dateString = selectedDate.toISOString().split("T")[0];
+      updateConditions({ date: dateString });
+    }
+  };
+
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const timeString = selectedTime.toTimeString().slice(0, 5);
+      updateConditions({ time: timeString });
+    }
+  };
+
+  const handleNext = async () => {
+    if (!state.conditions.date || !state.conditions.time) {
+      if (Platform.OS !== "web") {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
+    router.push("../inspection/items");
   };
 
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-6">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <View className="gap-6 pb-6">
           {/* Header */}
-          <View className="items-center gap-2">
-            <Text className="text-3xl font-bold text-foreground">Condições da Vistoria</Text>
-            <Text className="text-sm text-muted text-center">
-              Etapa 3 - Verifique as condições antes de iniciar
-            </Text>
+          <View className="gap-2">
+            <Text className="text-2xl font-bold text-foreground">Condições da Vistoria</Text>
+            <Text className="text-sm text-muted">Etapa 2 de 4</Text>
           </View>
 
-          {/* Cliente Info */}
-          <View className="bg-surface rounded-lg p-4 border border-border">
-            <Text className="text-sm font-semibold text-foreground mb-2">Cliente</Text>
-            <Text className="text-base text-foreground">{inspection?.clientData.name}</Text>
-            <Text className="text-sm text-muted">{inspection?.clientData.phone}</Text>
-          </View>
-
-          {/* Tipo de Vistoria */}
-          <View className="bg-surface rounded-lg p-4 border border-border">
-            <Text className="text-sm font-semibold text-foreground mb-2">Tipo de Vistoria</Text>
-            <Text className="text-base text-primary font-semibold capitalize">
-              {inspection?.type === "simple" && "Vistoria Simples"}
-              {inspection?.type === "technical" && "Vistoria Técnica"}
-              {inspection?.type === "rental" && "Vistoria para Locação"}
-            </Text>
-          </View>
-
-          {/* Dados Técnicos (se aplicável) */}
-          {inspection?.technicalData && (
-            <View className="bg-surface rounded-lg p-4 border border-border">
-              <Text className="text-sm font-semibold text-foreground mb-3">Dados Técnicos</Text>
-              <View className="gap-2">
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">CREA:</Text>
-                  <Text className="text-sm text-foreground font-semibold">
-                    {inspection.technicalData.crea}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">UF:</Text>
-                  <Text className="text-sm text-foreground font-semibold">
-                    {inspection.technicalData.uf}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">ART:</Text>
-                  <Text className="text-sm text-foreground font-semibold">
-                    {inspection.technicalData.art}
-                  </Text>
-                </View>
-              </View>
+          {/* Date and Time */}
+          <View className="gap-4">
+            <View className="gap-2">
+              <Text className="text-sm font-semibold text-foreground">Data da Vistoria *</Text>
+              <Pressable
+                onPress={() => setShowDatePicker(true)}
+                className="bg-surface border border-border rounded-lg p-3"
+              >
+                <Text className="text-base text-foreground">
+                  {state.conditions.date || "Selecione uma data"}
+                </Text>
+              </Pressable>
             </View>
-          )}
 
-          {/* Dados de Locação (se aplicável) */}
-          {inspection?.rentalData && (
-            <View className="bg-surface rounded-lg p-4 border border-border">
-              <Text className="text-sm font-semibold text-foreground mb-3">Dados de Locação</Text>
-              <View className="gap-2">
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">Endereço:</Text>
-                  <Text className="text-sm text-foreground font-semibold">
-                    {inspection.rentalData.address}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">Tipo:</Text>
-                  <Text className="text-sm text-foreground font-semibold capitalize">
-                    {inspection.rentalData.entryType === "entry" ? "Entrada" : "Saída"}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">Proprietário:</Text>
-                  <Text className="text-sm text-foreground font-semibold">
-                    {inspection.rentalData.landlordName}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-sm text-muted">Inquilino:</Text>
-                  <Text className="text-sm text-foreground font-semibold">
-                    {inspection.rentalData.tenantName}
-                  </Text>
-                </View>
-              </View>
+            {showDatePicker && (
+              <DateTimePicker
+                value={state.conditions.date ? new Date(state.conditions.date) : new Date()}
+                mode="date"
+                display="spinner"
+                onChange={handleDateChange}
+              />
+            )}
+
+            <View className="gap-2">
+              <Text className="text-sm font-semibold text-foreground">Hora da Vistoria *</Text>
+              <Pressable
+                onPress={() => setShowTimePicker(true)}
+                className="bg-surface border border-border rounded-lg p-3"
+              >
+                <Text className="text-base text-foreground">
+                  {state.conditions.time || "Selecione uma hora"}
+                </Text>
+              </Pressable>
             </View>
-          )}
 
-          {/* Info Box */}
-          <View className="bg-green-50 rounded-lg p-4 border border-green-200">
-            <Text className="text-xs text-green-900">
-              ✓ <Text className="font-semibold">Pronto!</Text> Todos os dados foram preenchidos corretamente. Clique em "Iniciar Vistoria" para começar.
-            </Text>
+            {showTimePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="time"
+                display="spinner"
+                onChange={handleTimeChange}
+              />
+            )}
           </View>
 
-          {/* Buttons */}
-          <View className="gap-3 mt-auto">
-            <TouchableOpacity
-              onPress={handleStartInspection}
-              className="w-full bg-primary px-6 py-4 rounded-lg active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-white">Iniciar Vistoria</Text>
-            </TouchableOpacity>
+          {/* Weather */}
+          <SegmentedControl
+            label="Condições Climáticas"
+            options={["Ensolarado", "Nublado", "Chuvoso", "Parcialmente nublado"]}
+            selectedValue={
+              {
+                sunny: "Ensolarado",
+                cloudy: "Nublado",
+                rainy: "Chuvoso",
+                partly_cloudy: "Parcialmente nublado",
+              }[state.conditions.weather] || "Ensolarado"
+            }
+            onValueChange={(value) => {
+              const weatherMap: Record<string, "sunny" | "cloudy" | "rainy" | "partly_cloudy"> = {
+                "Ensolarado": "sunny",
+                "Nublado": "cloudy",
+                "Chuvoso": "rainy",
+                "Parcialmente nublado": "partly_cloudy",
+              };
+              updateConditions({ weather: weatherMap[value] });
+            }}
+          />
 
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">Voltar</Text>
-            </TouchableOpacity>
+          {/* Access */}
+          <SegmentedControl
+            label="Condições de Acesso"
+            options={["Total", "Parcial", "Restrito"]}
+            selectedValue={
+              {
+                total: "Total",
+                partial: "Parcial",
+                restricted: "Restrito",
+              }[state.conditions.access] || "Total"
+            }
+            onValueChange={(value) => {
+              const accessMap: Record<string, "total" | "partial" | "restricted"> = {
+                "Total": "total",
+                "Parcial": "partial",
+                "Restrito": "restricted",
+              };
+              updateConditions({ access: accessMap[value] });
+            }}
+          />
+
+          {/* Lighting */}
+          <SegmentedControl
+            label="Iluminação"
+            options={["Adequada", "Parcial", "Insuficiente"]}
+            selectedValue={
+              {
+                adequate: "Adequada",
+                partial: "Parcial",
+                insufficient: "Insuficiente",
+              }[state.conditions.lighting] || "Adequada"
+            }
+            onValueChange={(value) => {
+              const lightingMap: Record<string, "adequate" | "partial" | "insufficient"> = {
+                "Adequada": "adequate",
+                "Parcial": "partial",
+                "Insuficiente": "insufficient",
+              };
+              updateConditions({ lighting: lightingMap[value] });
+            }}
+          />
+
+          {/* Occupancy */}
+          <SegmentedControl
+            label="Ocupação"
+            options={["Desocupado", "Ocupado", "Em obra"]}
+            selectedValue={
+              {
+                empty: "Desocupado",
+                occupied: "Ocupado",
+                under_construction: "Em obra",
+              }[state.conditions.occupancy] || "Desocupado"
+            }
+            onValueChange={(value) => {
+              const occupancyMap: Record<string, "empty" | "occupied" | "under_construction"> = {
+                "Desocupado": "empty",
+                "Ocupado": "occupied",
+                "Em obra": "under_construction",
+              };
+              updateConditions({ occupancy: occupancyMap[value] });
+            }}
+          />
+
+          {/* Navigation Buttons */}
+          <View className="gap-3 mt-4">
+            <LargeButton title="Próximo" onPress={handleNext} variant="primary" />
+            <Pressable onPress={() => router.back()}>
+              <Text className="text-center text-primary font-semibold">Voltar</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>

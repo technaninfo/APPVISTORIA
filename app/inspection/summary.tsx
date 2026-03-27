@@ -1,170 +1,170 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { ScrollView, View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { LargeButton } from "@/components/large-button";
 import { useInspection } from "@/lib/inspection-context";
+import { useState } from "react";
 
 export default function SummaryScreen() {
   const router = useRouter();
-  const { inspection, resetInspection } = useInspection();
+  const { state } = useInspection();
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    client: true,
+    vistoriador: true,
+    conditions: true,
+  });
 
-  const handleGeneratePDF = () => {
-    alert("Funcionalidade de PDF em desenvolvimento");
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
-  const handleShareWhatsApp = () => {
-    alert("Funcionalidade de WhatsApp em desenvolvimento");
+  const handleFinalize = () => {
+    router.push("../inspection/export");
   };
 
-  const handleShareEmail = () => {
-    alert("Funcionalidade de Email em desenvolvimento");
+  const handleEditSection = (section: string) => {
+    if (section === "client" || section === "vistoriador") {
+      router.push("../inspection/client-data");
+    } else if (section === "conditions") {
+      router.push("../inspection/conditions");
+    }
   };
 
-  const handleFinish = () => {
-    resetInspection();
-    router.push("/(tabs)/");
-  };
+  const SectionHeader = ({ title, section }: { title: string; section: string }) => (
+    <View className="flex-row items-center justify-between py-3">
+      <Pressable onPress={() => toggleSection(section)} className="flex-1">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-lg font-semibold text-foreground">{title}</Text>
+          <Text className="text-xl text-primary">{expandedSections[section] ? "−" : "+"}</Text>
+        </View>
+      </Pressable>
+      <Pressable onPress={() => handleEditSection(section)} className="ml-2 px-3 py-1 bg-primary rounded-full">
+        <Text className="text-xs font-semibold text-white">Editar</Text>
+      </Pressable>
+    </View>
+  );
 
-  // Calculate statistics
-  const stats = {
-    totalRooms: inspection?.rooms.length || 0,
-    totalTests: inspection?.rooms.reduce(
-      (sum, room) =>
-        sum +
-        room.sections.reduce((sectionSum, section) => sectionSum + section.tests.length, 0),
-      0
-    ) || 0,
-    passedTests: inspection?.rooms.reduce(
-      (sum, room) =>
-        sum +
-        room.sections.reduce(
-          (sectionSum, section) =>
-            sectionSum + section.tests.filter((t) => t.status === "pass").length,
-          0
-        ),
-      0
-    ) || 0,
-    failedTests: inspection?.rooms.reduce(
-      (sum, room) =>
-        sum +
-        room.sections.reduce(
-          (sectionSum, section) =>
-            sectionSum + section.tests.filter((t) => t.status === "fail").length,
-          0
-        ),
-      0
-    ) || 0,
-    naTests: inspection?.rooms.reduce(
-      (sum, room) =>
-        sum +
-        room.sections.reduce(
-          (sectionSum, section) =>
-            sectionSum + section.tests.filter((t) => t.status === "na").length,
-          0
-        ),
-      0
-    ) || 0,
-  };
+  const SectionContent = ({ children }: { children: React.ReactNode }) => (
+    <View className="bg-surface rounded-lg p-4 gap-2 border border-border">{children}</View>
+  );
+
+  const InfoRow = ({ label, value }: { label: string; value: string }) => (
+    <View className="flex-row justify-between py-2 border-b border-border last:border-b-0">
+      <Text className="text-sm text-muted flex-1">{label}</Text>
+      <Text className="text-sm font-semibold text-foreground flex-1 text-right">{value || "—"}</Text>
+    </View>
+  );
 
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-6">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <View className="gap-6 pb-6">
           {/* Header */}
-          <View className="items-center gap-2">
-            <Text className="text-3xl font-bold text-foreground">Resumo da Vistoria</Text>
-            <Text className="text-sm text-muted text-center">
-              Etapa Final - Revise e compartilhe o relatório
-            </Text>
-          </View>
-
-          {/* Client Info */}
-          <View className="bg-surface rounded-lg p-4 border border-border">
-            <Text className="text-sm font-semibold text-foreground mb-2">Cliente</Text>
-            <Text className="text-base text-foreground">{inspection?.clientData.name}</Text>
-            <Text className="text-sm text-muted">{inspection?.clientData.phone}</Text>
-          </View>
-
-          {/* Statistics */}
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-foreground">Estatísticas</Text>
-            <View className="grid grid-cols-2 gap-2">
-              <View className="bg-surface rounded-lg p-4 border border-border">
-                <Text className="text-2xl font-bold text-primary">{stats.totalRooms}</Text>
-                <Text className="text-xs text-muted">Cômodos</Text>
-              </View>
-              <View className="bg-surface rounded-lg p-4 border border-border">
-                <Text className="text-2xl font-bold text-primary">{stats.totalTests}</Text>
-                <Text className="text-xs text-muted">Testes</Text>
-              </View>
-              <View className="bg-surface rounded-lg p-4 border border-green-200 bg-green-50">
-                <Text className="text-2xl font-bold text-green-600">{stats.passedTests}</Text>
-                <Text className="text-xs text-green-700">Aprovados</Text>
-              </View>
-              <View className="bg-surface rounded-lg p-4 border border-red-200 bg-red-50">
-                <Text className="text-2xl font-bold text-red-600">{stats.failedTests}</Text>
-                <Text className="text-xs text-red-700">Reprovados</Text>
-              </View>
-            </View>
+            <Text className="text-2xl font-bold text-foreground">Resumo da Vistoria</Text>
+            <Text className="text-sm text-muted">Etapa 4 de 4</Text>
           </View>
 
-          {/* Rooms Summary */}
+          {/* Client Section */}
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-foreground">Cômodos Inspecionados</Text>
-            {inspection?.rooms && inspection.rooms.length > 0 ? (
-              inspection.rooms.map((room) => (
-                <View key={room.id} className="bg-surface rounded-lg p-3 border border-border">
-                  <Text className="text-sm font-semibold text-foreground">{room.name}</Text>
-                  <Text className="text-xs text-muted">
-                    {room.sections.length} seções • {room.sections.reduce((sum, s) => sum + s.tests.length, 0)} testes
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text className="text-sm text-muted">Nenhum cômodo inspecionado</Text>
+            <SectionHeader title="Cliente (Contratante)" section="client" />
+            {expandedSections.client && (
+              <SectionContent>
+                <InfoRow label="Nome" value={state.client.fullName} />
+                <InfoRow label="Email" value={state.client.email} />
+                <InfoRow label="Telefone" value={state.client.phone} />
+                <InfoRow label="Endereço" value={`${state.client.address.street}, ${state.client.address.number} ${state.client.address.complement}`} />
+                <InfoRow label="Bairro" value={state.client.address.neighborhood} />
+                <InfoRow label="Cidade" value={`${state.client.address.city}, ${state.client.address.state}`} />
+                <InfoRow label="CEP" value={state.client.address.cep} />
+              </SectionContent>
             )}
           </View>
 
-          {/* Action Buttons */}
-          <View className="gap-3">
-            <Text className="text-sm font-semibold text-foreground">Compartilhar Relatório</Text>
-
-            <TouchableOpacity
-              onPress={handleGeneratePDF}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">📄 Gerar PDF</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleShareWhatsApp}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">💬 Compartilhar WhatsApp</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleShareEmail}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">📧 Enviar Email</Text>
-            </TouchableOpacity>
+          {/* Inspector Section */}
+          <View className="gap-2">
+            <SectionHeader title="Vistoriador (Contratada)" section="vistoriador" />
+            {expandedSections.vistoriador && (
+              <SectionContent>
+                <InfoRow label="Nome" value={state.vistoriador.name} />
+                <InfoRow label="CPF/CNPJ" value={state.vistoriador.document} />
+                <InfoRow label="Email" value={state.vistoriador.email} />
+                <InfoRow label="Telefone" value={state.vistoriador.phone} />
+                <InfoRow label="Endereço" value={`${state.vistoriador.address.street}, ${state.vistoriador.address.number} ${state.vistoriador.address.complement}`} />
+                <InfoRow label="Bairro" value={state.vistoriador.address.neighborhood} />
+                <InfoRow label="Cidade" value={`${state.vistoriador.address.city}, ${state.vistoriador.address.state}`} />
+                <InfoRow label="CEP" value={state.vistoriador.address.cep} />
+                {state.type === "technical" && (
+                  <>
+                    <InfoRow label="CREA" value={state.vistoriador.crea || ""} />
+                    <InfoRow label="CAU" value={state.vistoriador.cau || ""} />
+                  </>
+                )}
+              </SectionContent>
+            )}
           </View>
 
-          {/* Finish Button */}
-          <View className="gap-3 mt-auto">
-            <TouchableOpacity
-              onPress={handleFinish}
-              className="w-full bg-primary px-6 py-4 rounded-lg active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-white">Finalizar Vistoria</Text>
-            </TouchableOpacity>
+          {/* Conditions Section */}
+          <View className="gap-2">
+            <SectionHeader title="Condições da Vistoria" section="conditions" />
+            {expandedSections.conditions && (
+              <SectionContent>
+                <InfoRow label="Data" value={state.conditions.date} />
+                <InfoRow label="Hora" value={state.conditions.time} />
+                <InfoRow
+                  label="Clima"
+                  value={
+                    {
+                      sunny: "Ensolarado",
+                      cloudy: "Nublado",
+                      rainy: "Chuvoso",
+                      partly_cloudy: "Parcialmente nublado",
+                    }[state.conditions.weather] || ""
+                  }
+                />
+                <InfoRow
+                  label="Acesso"
+                  value={
+                    {
+                      total: "Total",
+                      partial: "Parcial",
+                      restricted: "Restrito",
+                    }[state.conditions.access] || ""
+                  }
+                />
+                <InfoRow
+                  label="Iluminação"
+                  value={
+                    {
+                      adequate: "Adequada",
+                      partial: "Parcial",
+                      insufficient: "Insuficiente",
+                    }[state.conditions.lighting] || ""
+                  }
+                />
+                <InfoRow
+                  label="Ocupação"
+                  value={
+                    {
+                      empty: "Desocupado",
+                      occupied: "Ocupado",
+                      under_construction: "Em obra",
+                    }[state.conditions.occupancy] || ""
+                  }
+                />
+              </SectionContent>
+            )}
+          </View>
 
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">Voltar</Text>
-            </TouchableOpacity>
+          {/* Navigation Buttons */}
+          <View className="gap-3 mt-4">
+            <LargeButton title="Finalizar Vistoria" onPress={handleFinalize} variant="success" />
+            <Pressable onPress={() => router.back()}>
+              <Text className="text-center text-primary font-semibold">Voltar</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>

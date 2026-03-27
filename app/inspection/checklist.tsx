@@ -1,293 +1,394 @@
-import { ScrollView, Text, View, TouchableOpacity, FlatList } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { ScrollView, View, Text, Pressable, FlatList } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
-import { useInspection, type Section, type Test } from "@/lib/inspection-context";
-import { useState, useMemo } from "react";
-
-// Default sections and tests for all inspection types
-const DEFAULT_SECTIONS = [
-  {
-    name: "Estrutura",
-    tests: [
-      "Fundação",
-      "Paredes",
-      "Teto",
-      "Piso",
-      "Cobertura",
-    ],
-  },
-  {
-    name: "Hidráulica",
-    tests: [
-      "Tubulações",
-      "Vazamentos",
-      "Torneiras",
-      "Chuveiro",
-      "Vaso sanitário",
-    ],
-  },
-  {
-    name: "Elétrica",
-    tests: [
-      "Fiação",
-      "Disjuntores",
-      "Tomadas",
-      "Interruptores",
-      "Iluminação",
-    ],
-  },
-  {
-    name: "Acabamento",
-    tests: [
-      "Pintura",
-      "Azulejos",
-      "Portas",
-      "Janelas",
-      "Rodapé",
-    ],
-  },
-];
+import { LargeButton } from "@/components/large-button";
+import { PhotoCaptureModal } from "@/components/photo-capture-modal";
+import { INTERNAL_CHECKLIST, EXTERNAL_CHECKLIST, AreaType, TestStatus, ChecklistSection, TestItem, PhotoWithCaption } from "@/lib/checklist-data";
+import { useInspection } from "@/lib/inspection-context";
+import * as Haptics from "expo-haptics";
+import { Platform } from "react-native";
 
 export default function ChecklistScreen() {
   const router = useRouter();
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { inspection, addSection, updateTest, addTest } = useInspection();
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const params = useLocalSearchParams();
+  const { addRoom } = useInspection();
+  const areaType = (params.areaType as AreaType) || "internal";
+  const roomName = (Array.isArray(params.roomName) ? params.roomName[0] : params.roomName) || "Cômodo";
 
-  const currentRoom = useMemo(() => {
-    return inspection?.rooms.find((r) => r.id === roomId);
-  }, [inspection, roomId]);
+  const [sections, setSections] = useState<ChecklistSection[]>(
+    areaType === "internal" ? INTERNAL_CHECKLIST : EXTERNAL_CHECKLIST
+  );
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [memorialAvailable, setMemorialAvailable] = useState(false);
+  const [projectAvailable, setProjectAvailable] = useState(false);
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [selectedTestForPhoto, setSelectedTestForPhoto] = useState<{ sectionId: string; testId: string } | null>(null);
 
-  const handleAddSection = (sectionName: string, testNames: string[]) => {
-    if (!currentRoom) return;
+  // Verificar se todos os testes foram preenchidos
+  const allTestsFilled = sections.every((section) =>
+    section.tests.every((test) => test.status !== "pending")
+  );
 
-    const newSection: Section = {
-      id: Date.now().toString(),
-      name: sectionName,
-      tests: testNames.map((testName, idx) => ({
-        id: `${Date.now()}-${idx}`,
-        name: testName,
-        status: "pass" as const,
-        photos: [],
-      })),
-      isNA: false,
-    };
-
-    addSection(roomId!, newSection);
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
   };
 
-  const handleTestStatusChange = (
-    sectionId: string,
-    testId: string,
-    status: "pass" | "fail" | "na"
-  ) => {
-    if (!currentRoom) return;
+  const updateTestStatus = (sectionId: string, testId: string, status: TestStatus) => {
+    setSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              tests: section.tests.map((test) =>
+                test.id === testId ? { ...test, status } : test
+              ),
+            }
+          : section
+      )
+    );
 
-    const section = currentRoom.sections.find((s) => s.id === sectionId);
-    if (!section) return;
-
-    const test = section.tests.find((t) => t.id === testId);
-    if (!test) return;
-
-    updateTest(roomId!, sectionId, testId, {
-      ...test,
-      status,
-    });
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   };
 
-  const handleSectionNA = (sectionId: string, isNA: boolean) => {
-    if (!currentRoom) return;
+  const handlePhotoSave = (photos: PhotoWithCaption[]) => {
+    if (!selectedTestForPhoto) return;
 
-    const section = currentRoom.sections.find((s) => s.id === sectionId);
-    if (!section) return;
+    setSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === selectedTestForPhoto.sectionId
+          ? {
+              ...section,
+              tests: section.tests.map((test) =>
+                test.id === selectedTestForPhoto.testId
+                  ? { ...test, photos }
+                  : test
+              ),
+            }
+          : section
+      )
+    );
 
-    // Mark all tests in section as NA
-    section.tests.forEach((test) => {
-      updateTest(roomId!, sectionId, test.id, {
-        ...test,
-        status: isNA ? ("na" as const) : ("pass" as const),
-      });
-    });
+    setSelectedTestForPhoto(null);
+    setPhotoModalVisible(false);
   };
 
-  const handleContinue = () => {
-    router.push({
-      pathname: "/inspection/summary",
-      params: { roomId },
-    });
+  const TestRow = ({ test, sectionId }: { test: TestItem; sectionId: string }) => (
+    <View className="mb-3">
+      <View className="flex-row items-center gap-3">
+        <View className="flex-1">
+          <Text className="text-sm text-foreground">{test.description}</Text>
+        </View>
+
+        {/* Status Buttons */}
+        <View className="flex-row gap-2">
+          <Pressable
+            onPress={() => updateTestStatus(sectionId, test.id, "approved")}
+            style={({ pressed }) => [
+              {
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: test.status === "approved" ? "#10B981" : "#f5f5f5",
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 6,
+                borderWidth: 1,
+                borderColor: test.status === "approved" ? "#10B981" : "#e5e7eb",
+              },
+            ]}
+          >
+            <Text
+              style={{
+                color: test.status === "approved" ? "white" : "#666",
+                fontSize: 12,
+                fontWeight: "600",
+              }}
+            >
+              ✓
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => updateTestStatus(sectionId, test.id, "rejected")}
+            style={({ pressed }) => [
+              {
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: test.status === "rejected" ? "#EF4444" : "#f5f5f5",
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 6,
+                borderWidth: 1,
+                borderColor: test.status === "rejected" ? "#EF4444" : "#e5e7eb",
+              },
+            ]}
+          >
+            <Text
+              style={{
+                color: test.status === "rejected" ? "white" : "#666",
+                fontSize: 12,
+                fontWeight: "600",
+              }}
+            >
+              ✕
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => updateTestStatus(sectionId, test.id, "na")}
+            style={({ pressed }) => [
+              {
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: test.status === "na" ? "#9CA3AF" : "#f5f5f5",
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 6,
+                borderWidth: 1,
+                borderColor: test.status === "na" ? "#9CA3AF" : "#e5e7eb",
+              },
+            ]}
+          >
+            <Text
+              style={{
+                color: test.status === "na" ? "white" : "#666",
+                fontSize: 10,
+                fontWeight: "600",
+              }}
+            >
+              NA
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Photo section for rejected tests */}
+      {test.status === "rejected" && (
+        <View className="mt-2 ml-0">
+          {test.photos.length > 0 && (
+            <Text className="text-xs text-success mb-2">📷 {test.photos.length} foto(s) anexada(s)</Text>
+          )}
+          <Pressable
+            onPress={() => {
+              setSelectedTestForPhoto({ sectionId, testId: test.id });
+              setPhotoModalVisible(true);
+            }}
+            style={({ pressed }) => [{
+              opacity: pressed ? 0.7 : 1,
+              backgroundColor: "#f0f9ff",
+              borderRadius: 6,
+              paddingHorizontal: 8,
+              paddingVertical: 6,
+              borderWidth: 1,
+              borderColor: "#0a7ea4",
+            }]}
+          >
+            <Text className="text-xs text-primary font-semibold">+ Adicionar Foto</Text>
+          </Pressable>
+        </View>
+      )}
+    </View>
+  );
+
+  const SectionComponent = ({ section }: { section: ChecklistSection }) => {
+    const isExpanded = expandedSections[section.id];
+    const allTestsInSectionFilled = section.tests.every((test) => test.status !== "pending");
+
+    return (
+      <View className="mb-4 border border-border rounded-lg overflow-hidden bg-surface">
+        <Pressable
+          onPress={() => toggleSection(section.id)}
+          style={({ pressed }) => [
+            {
+              opacity: pressed ? 0.7 : 1,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              backgroundColor: allTestsInSectionFilled ? "#f0fdf4" : "#fafafa",
+              borderBottomWidth: isExpanded ? 1 : 0,
+              borderBottomColor: "#e5e7eb",
+            },
+          ]}
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="font-semibold text-foreground">{section.title}</Text>
+              <Text className="text-xs text-muted mt-1">
+                {section.tests.filter((t) => t.status !== "pending").length}/{section.tests.length} testes
+              </Text>
+            </View>
+            <Text className="text-lg text-primary">{isExpanded ? "−" : "+"}</Text>
+          </View>
+        </Pressable>
+
+        {isExpanded && (
+          <View className="px-4 py-3 gap-3">
+            {section.tests.map((test) => (
+              <TestRow key={test.id} test={test} sectionId={section.id} />
+            ))}
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-4">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="gap-4 pb-6">
           {/* Header */}
-          <View className="items-center gap-2 mb-4">
-            <Text className="text-3xl font-bold text-foreground">Checklist</Text>
-            <Text className="text-sm text-muted text-center">
-              Cômodo: {currentRoom?.name}
+          <View className="gap-2">
+            <Text className="text-2xl font-bold text-foreground">Checklist</Text>
+            <Text className="text-sm text-muted">
+              {areaType === "internal" ? "Área Interna" : "Área Externa"} - {String(roomName)}
             </Text>
           </View>
 
-          {/* Existing Sections */}
-          {currentRoom?.sections && currentRoom.sections.length > 0 ? (
-            currentRoom.sections.map((section) => (
-              <View key={section.id} className="gap-2">
-                {/* Section Header */}
-                <TouchableOpacity
-                  onPress={() =>
-                    setExpandedSection(
-                      expandedSection === section.id ? null : section.id
-                    )
-                  }
-                  className="bg-primary rounded-lg p-4 flex-row justify-between items-center"
-                >
-                  <View className="flex-1">
-                    <Text className="text-lg font-semibold text-white">
-                      {section.name}
-                    </Text>
-                    <Text className="text-xs text-white/80">
-                      {section.tests.length} testes
-                    </Text>
+          {/* Info Box */}
+          <View className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <Text className="text-xs text-blue-900">
+              ℹ️ Clique nos botões para marcar cada teste: ✓ (Aprovado), ✕ (Reprovado), NA (Não Aplicável)
+            </Text>
+          </View>
+
+          {/* Memorial & Project */}
+          <View className="gap-3">
+            <View className="flex-row gap-4">
+              <Pressable
+                onPress={() => setMemorialAvailable(!memorialAvailable)}
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View className="flex-row items-center gap-2">
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 4,
+                      borderWidth: 2,
+                      borderColor: "#0a7ea4",
+                      backgroundColor: memorialAvailable ? "#0a7ea4" : "transparent",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {memorialAvailable && <Text style={{ color: "white", fontSize: 12 }}>✓</Text>}
                   </View>
-                  <Text className="text-white text-xl">
-                    {expandedSection === section.id ? "▼" : "▶"}
-                  </Text>
-                </TouchableOpacity>
+                  <Text className="text-sm text-foreground">Memorial Disponível</Text>
+                </View>
+              </Pressable>
 
-                {/* Tests */}
-                {expandedSection === section.id && (
-                  <View className="gap-2 ml-2">
-                    {section.tests.map((test) => (
-                      <View
-                        key={test.id}
-                        className="bg-surface rounded-lg p-3 border border-border"
-                      >
-                        <View className="flex-row justify-between items-center mb-2">
-                          <Text className="text-sm font-semibold text-foreground flex-1">
-                            {test.name}
-                          </Text>
-                        </View>
-
-                        {/* Status Buttons */}
-                        <View className="flex-row gap-2">
-                          <TouchableOpacity
-                            onPress={() =>
-                              handleTestStatusChange(section.id, test.id, "pass")
-                            }
-                            className={`flex-1 px-3 py-2 rounded-lg ${
-                              test.status === "pass"
-                                ? "bg-green-500"
-                                : "bg-gray-300"
-                            }`}
-                          >
-                            <Text
-                              className={`text-center text-xs font-semibold ${
-                                test.status === "pass"
-                                  ? "text-white"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              ✓ OK
-                            </Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            onPress={() =>
-                              handleTestStatusChange(section.id, test.id, "fail")
-                            }
-                            className={`flex-1 px-3 py-2 rounded-lg ${
-                              test.status === "fail"
-                                ? "bg-red-500"
-                                : "bg-gray-300"
-                            }`}
-                          >
-                            <Text
-                              className={`text-center text-xs font-semibold ${
-                                test.status === "fail"
-                                  ? "text-white"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              ✗ Falha
-                            </Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            onPress={() =>
-                              handleTestStatusChange(section.id, test.id, "na")
-                            }
-                            className={`flex-1 px-3 py-2 rounded-lg ${
-                              test.status === "na"
-                                ? "bg-gray-500"
-                                : "bg-gray-300"
-                            }`}
-                          >
-                            <Text
-                              className={`text-center text-xs font-semibold ${
-                                test.status === "na"
-                                  ? "text-white"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              N/A
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    ))}
+              <Pressable
+                onPress={() => setProjectAvailable(!projectAvailable)}
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View className="flex-row items-center gap-2">
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 4,
+                      borderWidth: 2,
+                      borderColor: "#0a7ea4",
+                      backgroundColor: projectAvailable ? "#0a7ea4" : "transparent",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {projectAvailable && <Text style={{ color: "white", fontSize: 12 }}>✓</Text>}
                   </View>
-                )}
-              </View>
-            ))
-          ) : (
-            <View className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <Text className="text-sm text-blue-900">
-                💡 Nenhuma seção adicionada. Selecione as seções abaixo para começar.
+                  <Text className="text-sm text-foreground">Projeto Disponível</Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Sections */}
+          {sections.map((section) => (
+            <SectionComponent key={section.id} section={section} />
+          ))}
+
+          {/* Completion Status */}
+          {allTestsFilled && (
+            <View className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <Text className="text-sm font-semibold text-green-900">
+                ✓ Checklist Completo! Você pode prosseguir.
               </Text>
             </View>
           )}
 
-          {/* Add Sections */}
-          <View className="gap-2 mt-4">
-            <Text className="text-sm font-semibold text-foreground">
-              Adicionar Seções:
-            </Text>
-            {DEFAULT_SECTIONS.map((section) => (
-              <TouchableOpacity
-                key={section.name}
-                onPress={() =>
-                  handleAddSection(section.name, section.tests)
+          {/* Navigation Buttons */}
+          <View className="gap-3 mt-4">
+            <LargeButton
+              title="Adicionar Novo Cômodo"
+              onPress={() => {
+                if (allTestsFilled) {
+                  addRoom({
+                    id: `room_${Date.now()}`,
+                    roomName,
+                    areaType,
+                    sections,
+                    memorialAvailable,
+                    projectAvailable,
+                  });
+                  if (Platform.OS !== "web") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  router.push("../inspection/room-selection");
+                } else {
+                  if (Platform.OS !== "web") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                  }
                 }
-                className="bg-surface rounded-lg p-3 border border-dashed border-primary active:opacity-80"
-              >
-                <Text className="text-sm font-semibold text-primary">
-                  + {section.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Buttons */}
-          <View className="gap-3 mt-auto">
-            <TouchableOpacity
-              onPress={handleContinue}
-              className="w-full bg-primary px-6 py-4 rounded-lg active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-white">
-                Próximo Cômodo / Resumo
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-full bg-surface px-6 py-4 rounded-lg border border-border active:opacity-80"
-            >
-              <Text className="text-center font-semibold text-foreground">Voltar</Text>
-            </TouchableOpacity>
+              }}
+              variant="secondary"
+              disabled={!allTestsFilled}
+            />
+            <LargeButton
+              title="Finalizar Vistoria"
+              onPress={() => {
+                if (allTestsFilled) {
+                  addRoom({
+                    id: `room_${Date.now()}`,
+                    roomName,
+                    areaType,
+                    sections,
+                    memorialAvailable,
+                    projectAvailable,
+                  });
+                  if (Platform.OS !== "web") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  router.push("../inspection/summary");
+                }
+              }}
+              variant="primary"
+              disabled={!allTestsFilled}
+            />
+            <Pressable onPress={() => router.back()}>
+              <Text className="text-center text-primary font-semibold">Voltar</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
+
+      {/* Photo Capture Modal */}
+      <PhotoCaptureModal
+        visible={photoModalVisible}
+        onClose={() => {
+          setPhotoModalVisible(false);
+          setSelectedTestForPhoto(null);
+        }}
+        onSave={handlePhotoSave}
+        existingPhotos={selectedTestForPhoto ? sections
+          .find((s) => s.id === selectedTestForPhoto.sectionId)?.tests
+          .find((t) => t.id === selectedTestForPhoto.testId)?.photos || []
+          : []}
+      />
     </ScreenContainer>
   );
 }
