@@ -127,3 +127,13 @@
 - [x] Adicionar suporte a CPF/CNPJ para cliente e vistoriador
 - [x] Adicionar suporte a Nome/Razão Social
 - [x] Corrigir referências a cpf em todos os arquivos
+
+
+## Fase 12: Suporte para 3 Tipos de Vistoria (Novo)
+- [x] Adicionar terceiro botão "Vistoria Simples" na tela inicial
+- [x] Renomear "Vistoria Técnica" para "Vistoria Técnica" (manter como está)
+- [x] Renomear "Entrega de Chaves" para "Vistoria para Locação"
+- [x] Implementar fluxo de Vistoria Simples (sem campos técnicos)
+- [x] Implementar fluxo de Vistoria Técnica (com CREA/ART/parecer)
+- [x] Implementar fluxo de Vistoria para Locação (com estado/descrição/foto obrigatória)
+- [ ] Adicionar responsável/data/assinatura em todos os tipos

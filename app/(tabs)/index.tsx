@@ -38,8 +38,13 @@ export default function HomeScreen() {
     router.push("../inspection/client-data");
   };
 
-  const handleDeliveryInspection = () => {
-    setInspectionType("delivery");
+  const handleSimpleInspection = () => {
+    setInspectionType("simple");
+    router.push("../inspection/client-data");
+  };
+
+  const handleRentalInspection = () => {
+    setInspectionType("rental");
     router.push("../inspection/client-data");
   };
 
@@ -63,6 +68,14 @@ export default function HomeScreen() {
           {/* Buttons */}
           <View className="gap-4">
             <LargeButton
+              title="Vistoria Simples"
+              subtitle="básica"
+              onPress={handleSimpleInspection}
+              variant="secondary"
+              icon={require("@/assets/images/icon.png")}
+              iconSize={56}
+            />
+            <LargeButton
               title="Vistoria Técnica"
               subtitle="com ART"
               onPress={handleTechnicalInspection}
@@ -71,9 +84,9 @@ export default function HomeScreen() {
               iconSize={56}
             />
             <LargeButton
-              title="Entrega de Chaves"
-              subtitle="sem ART"
-              onPress={handleDeliveryInspection}
+              title="Vistoria para Locação"
+              subtitle="aluguel"
+              onPress={handleRentalInspection}
               variant="secondary"
               icon={require("@/assets/images/icon.png")}
               iconSize={56}

@@ -43,6 +43,9 @@ export default function ClientDataScreen() {
       return;
     }
 
+    // Para vistoria de locação, não exigir CREA/CAU
+    // Para vistoria simples, não exigir CREA/CAU
+
     if (Platform.OS !== "web") {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -263,6 +266,25 @@ export default function ClientDataScreen() {
                 placeholder="Ex: 123456"
                 value={state.vistoriador.cau || ""}
                 onChangeText={(text) => updateVistoriador({ cau: text })}
+              />
+            </View>
+          )}
+
+          {/* Rental Section (only for rental inspections) */}
+          {state.type === "rental" && (
+            <View className="gap-4">
+              <Text className="text-lg font-semibold text-foreground">Dados de Locação</Text>
+              <FormInput
+                label="Proprietário"
+                placeholder="Ex: João Silva"
+                value={state.vistoriador.name || ""}
+                onChangeText={(text) => updateVistoriador({ name: text })}
+              />
+              <FormInput
+                label="Inquilino"
+                placeholder="Ex: Maria Santos"
+                value={state.client.fullName || ""}
+                onChangeText={(text) => updateClient({ fullName: text })}
               />
             </View>
           )}

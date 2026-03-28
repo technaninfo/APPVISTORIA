@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer } from "react";
 
-export type InspectionType = "technical" | "delivery";
+export type InspectionType = "simple" | "technical" | "rental";
 
 export interface AddressData {
   street: string;
