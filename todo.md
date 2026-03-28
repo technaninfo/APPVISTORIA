@@ -137,3 +137,11 @@
 - [x] Implementar fluxo de Vistoria Técnica (com CREA/ART/parecer)
 - [x] Implementar fluxo de Vistoria para Locação (com estado/descrição/foto obrigatória)
 - [ ] Adicionar responsável/data/assinatura em todos os tipos
+
+
+## Correções de Dados da Vistoria (Novo)
+- [x] Remover obrigatoriedade de todos os campos (deixar opcional)
+- [x] Melhorar visual da tela de dados
+- [x] Corrigir campo Cidade (flex-1 está errado)
+- [x] Pré-estabelecer UF com valor padrão (SP)
+- [x] Reconfigurar máscara CPF/CNPJ para aceitar ambos corretamente

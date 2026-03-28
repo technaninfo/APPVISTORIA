@@ -6,29 +6,19 @@ import { FormInput } from "@/components/form-input";
 import { LargeButton } from "@/components/large-button";
 import { Toast } from "@/components/toast";
 import { useInspection } from "@/lib/inspection-context";
-import { useCPFMask } from "@/hooks/use-cpf-mask";
+import { useDocumentMask } from "@/hooks/use-document-mask";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
 export default function ClientDataScreen() {
   const router = useRouter();
   const { state, updateClient, updateVistoriador } = useInspection();
-  const { formatCPF } = useCPFMask();
+  const { formatDocument } = useDocumentMask();
   const [showToast, setShowToast] = useState(false);
 
   const handleNext = async () => {
-    // Validar campos obrigatórios
-    if (
-      !state.client.fullName ||
-      !state.client.email ||
-      !state.client.phone ||
-      !state.client.address.street ||
-      !state.client.address.number ||
-      !state.vistoriador.name ||
-      !state.vistoriador.document ||
-      !state.vistoriador.email ||
-      !state.vistoriador.phone
-    ) {
+    // Validar apenas campos essenciais
+    if (!state.client.fullName || !state.vistoriador.name) {
       if (Platform.OS !== "web") {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
@@ -42,9 +32,6 @@ export default function ClientDataScreen() {
       }
       return;
     }
-
-    // Para vistoria de locação, não exigir CREA/CAU
-    // Para vistoria simples, não exigir CREA/CAU
 
     if (Platform.OS !== "web") {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -78,14 +65,12 @@ export default function ClientDataScreen() {
               placeholder="Ex: João Silva"
               value={state.client.fullName}
               onChangeText={(text) => updateClient({ fullName: text })}
-              required
             />
             <FormInput
               label="Rua"
               placeholder="Ex: Rua das Flores"
               value={state.client.address.street}
               onChangeText={(text) => updateClient({ address: { ...state.client.address, street: text } })}
-              required
             />
             <View className="flex-row gap-3">
               <View className="flex-1">
@@ -95,7 +80,6 @@ export default function ClientDataScreen() {
                   value={state.client.address.number}
                   onChangeText={(text) => updateClient({ address: { ...state.client.address, number: text } })}
                   keyboardType="numeric"
-                  required
                 />
               </View>
               <View className="flex-1">
@@ -122,13 +106,12 @@ export default function ClientDataScreen() {
                   onChangeText={(text) => updateClient({ address: { ...state.client.address, city: text } })}
                 />
               </View>
-              <View className="flex-0.3">
+              <View className="flex-0.25">
                 <FormInput
                   label="UF"
                   placeholder="SP"
-                  value={state.client.address.state}
-                  onChangeText={(text) => updateClient({ address: { ...state.client.address, state: text.toUpperCase() } })}
-
+                  value={state.client.address.state || "SP"}
+                  onChangeText={(text) => updateClient({ address: { ...state.client.address, state: text.toUpperCase().slice(0, 2) } })}
                 />
               </View>
             </View>
@@ -145,7 +128,6 @@ export default function ClientDataScreen() {
               value={state.client.email}
               onChangeText={(text) => updateClient({ email: text })}
               keyboardType="email-address"
-              required
             />
             <FormInput
               label="Telefone"
@@ -153,7 +135,6 @@ export default function ClientDataScreen() {
               value={state.client.phone}
               onChangeText={(text) => updateClient({ phone: text })}
               keyboardType="phone-pad"
-              required
             />
           </View>
 
@@ -165,16 +146,13 @@ export default function ClientDataScreen() {
               placeholder="Ex: João Vistoriador ou Empresa XYZ"
               value={state.vistoriador.name}
               onChangeText={(text) => updateVistoriador({ name: text })}
-              required
             />
             <FormInput
               label="CPF/CNPJ"
-              placeholder="Ex: 123.456.789-00"
+              placeholder="Ex: 123.456.789-00 ou 00.000.000/0000-00"
               value={state.vistoriador.document}
-              onChangeText={(text) => updateVistoriador({ document: text })}
+              onChangeText={(text) => updateVistoriador({ document: formatDocument(text) })}
               keyboardType="numeric"
-              mask={formatCPF}
-              required
             />
             <FormInput
               label="Rua"
@@ -216,13 +194,12 @@ export default function ClientDataScreen() {
                   onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, city: text } })}
                 />
               </View>
-              <View className="flex-0.3">
+              <View className="flex-0.25">
                 <FormInput
                   label="UF"
                   placeholder="SP"
-                  value={state.vistoriador.address.state}
-                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, state: text.toUpperCase() } })}
-
+                  value={state.vistoriador.address.state || "SP"}
+                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, state: text.toUpperCase().slice(0, 2) } })}
                 />
               </View>
             </View>
@@ -239,7 +216,6 @@ export default function ClientDataScreen() {
               value={state.vistoriador.email}
               onChangeText={(text) => updateVistoriador({ email: text })}
               keyboardType="email-address"
-              required
             />
             <FormInput
               label="Telefone"
@@ -247,7 +223,6 @@ export default function ClientDataScreen() {
               value={state.vistoriador.phone}
               onChangeText={(text) => updateVistoriador({ phone: text })}
               keyboardType="phone-pad"
-              required
             />
           </View>
 
