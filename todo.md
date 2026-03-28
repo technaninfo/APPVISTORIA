@@ -145,3 +145,8 @@
 - [x] Corrigir campo Cidade (flex-1 está errado)
 - [x] Pré-estabelecer UF com valor padrão (SP)
 - [x] Reconfigurar máscara CPF/CNPJ para aceitar ambos corretamente
+
+
+## Correções Urgentes (Novo)
+- [x] Transformar UF em Picker/Select com lista de estados (RJ, SP, MG, etc)
+- [x] Investigar por que não aparece nada após clicar em "Próximo" na tela de dados

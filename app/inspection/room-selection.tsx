@@ -39,7 +39,7 @@ export default function RoomSelectionScreen() {
 
     // Passar dados para a próxima tela via router params
     router.push({
-      pathname: "../inspection/checklist",
+      pathname: "../inspection/items",
       params: {
         areaType,
         roomName: roomName.trim(),

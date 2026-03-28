@@ -7,6 +7,7 @@ import { LargeButton } from "@/components/large-button";
 import { Toast } from "@/components/toast";
 import { useInspection } from "@/lib/inspection-context";
 import { useDocumentMask } from "@/hooks/use-document-mask";
+import { StateSelect } from "@/components/state-select";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
@@ -107,11 +108,11 @@ export default function ClientDataScreen() {
                 />
               </View>
               <View className="flex-0.25">
-                <FormInput
+                <StateSelect
                   label="UF"
-                  placeholder="SP"
                   value={state.client.address.state || "SP"}
-                  onChangeText={(text) => updateClient({ address: { ...state.client.address, state: text.toUpperCase().slice(0, 2) } })}
+                  onValueChange={(text) => updateClient({ address: { ...state.client.address, state: text } })}
+                  placeholder="SP"
                 />
               </View>
             </View>
@@ -195,11 +196,11 @@ export default function ClientDataScreen() {
                 />
               </View>
               <View className="flex-0.25">
-                <FormInput
+                <StateSelect
                   label="UF"
-                  placeholder="SP"
                   value={state.vistoriador.address.state || "SP"}
-                  onChangeText={(text) => updateVistoriador({ address: { ...state.vistoriador.address, state: text.toUpperCase().slice(0, 2) } })}
+                  onValueChange={(text) => updateVistoriador({ address: { ...state.vistoriador.address, state: text } })}
+                  placeholder="SP"
                 />
               </View>
             </View>
