@@ -2,19 +2,16 @@ import { ScrollView, View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { LargeButton } from "@/components/large-button";
-import { FormInput } from "@/components/form-input";
 import { useInspection } from "@/lib/inspection-context";
 import { useState } from "react";
 
 export default function SummaryScreen() {
   const router = useRouter();
-  const { state, updateTechnicalFinal, updateSimpleSignature } = useInspection();
+  const { state } = useInspection();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     client: true,
     vistoriador: true,
     conditions: true,
-    technicalFinal: state.type === "technical",
-    simpleSignature: state.type === "simple" || state.type === "rental",
   });
 
   const toggleSection = (section: string) => {
@@ -33,8 +30,6 @@ export default function SummaryScreen() {
       router.push("../inspection/client-data");
     } else if (section === "conditions") {
       router.push("../inspection/conditions");
-    } else if (section === "items") {
-      router.push("../inspection/items");
     }
   };
 
@@ -163,130 +158,6 @@ export default function SummaryScreen() {
               </SectionContent>
             )}
           </View>
-
-          {/* Technical Final Section (only for technical inspection) */}
-          {state.type === "technical" && (
-            <View className="gap-2">
-              <SectionHeader title="Parecer Técnico Final" section="technicalFinal" />
-              {expandedSections.technicalFinal && (
-                <SectionContent>
-                  <FormInput
-                    label="Parecer Geral"
-                    placeholder="Parecer técnico geral sobre o imóvel"
-                    value={state.technicalFinal?.generalOpinion || ""}
-                    onChangeText={(text) => updateTechnicalFinal({ generalOpinion: text })}
-                    multiline
-                    numberOfLines={3}
-                  />
-
-                  <View className="gap-2 mt-3">
-                    <Text className="text-xs font-semibold text-muted uppercase">Classificação Geral</Text>
-                    <View className="flex-row gap-2">
-                      {[
-                        { value: "adequate", label: "Adequado" },
-                        { value: "with_reservations", label: "Com Ressalvas" },
-                        { value: "critical", label: "Crítico" },
-                      ].map((option) => (
-                        <Pressable
-                          key={option.value}
-                          onPress={() =>
-                            updateTechnicalFinal({
-                              generalClassification: option.value as any,
-                            })
-                          }
-                          className={`flex-1 py-2 px-3 rounded-lg ${
-                            state.technicalFinal?.generalClassification === option.value
-                              ? "bg-primary"
-                              : "bg-surface border border-border"
-                          }`}
-                        >
-                          <Text
-                            className={`text-xs font-semibold text-center ${
-                              state.technicalFinal?.generalClassification === option.value
-                                ? "text-white"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {option.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-
-                  <FormInput
-                    label="Recomendações"
-                    placeholder="Recomendações para o cliente"
-                    value={state.technicalFinal?.recommendations || ""}
-                    onChangeText={(text) => updateTechnicalFinal({ recommendations: text })}
-                    multiline
-                    numberOfLines={3}
-                  />
-
-                  <FormInput
-                    label="Número da ART"
-                    placeholder="Número da ART (Anotação de Responsabilidade Técnica)"
-                    value={state.technicalFinal?.artNumber || ""}
-                    onChangeText={(text) => updateTechnicalFinal({ artNumber: text })}
-                  />
-                </SectionContent>
-              )}
-            </View>
-          )}
-
-          {/* Simple Signature Section (for simple and rental inspections) */}
-          {(state.type === "simple" || state.type === "rental") && (
-            <View className="gap-2">
-              <SectionHeader title="Assinatura e Confirmação" section="simpleSignature" />
-              {expandedSections.simpleSignature && (
-                <SectionContent>
-                  <FormInput
-                    label="Nome do Responsável"
-                    placeholder="Nome de quem realizou a vistoria"
-                    value={state.simpleSignature?.responsibleName || ""}
-                    onChangeText={(text) => updateSimpleSignature({ responsibleName: text })}
-                  />
-
-                  <FormInput
-                    label="Data de Conclusão"
-                    placeholder="DD/MM/YYYY"
-                    value={state.simpleSignature?.date || ""}
-                    onChangeText={(text) => updateSimpleSignature({ date: text })}
-                  />
-
-                  <View className="gap-2 mt-3">
-                    <Pressable
-                      onPress={() =>
-                        updateSimpleSignature({
-                          clientAware: !state.simpleSignature?.clientAware,
-                        })
-                      }
-                      className={`flex-row items-center gap-3 p-3 rounded-lg border ${
-                        state.simpleSignature?.clientAware
-                          ? "bg-success border-success"
-                          : "bg-surface border-border"
-                      }`}
-                    >
-                      <View
-                        className={`w-5 h-5 rounded border-2 items-center justify-center ${
-                          state.simpleSignature?.clientAware
-                            ? "bg-success border-success"
-                            : "border-border"
-                        }`}
-                      >
-                        {state.simpleSignature?.clientAware && (
-                          <Text className="text-white font-bold">✓</Text>
-                        )}
-                      </View>
-                      <Text className="text-sm font-semibold text-foreground">
-                        Cliente ciente dos resultados
-                      </Text>
-                    </Pressable>
-                  </View>
-                </SectionContent>
-              )}
-            </View>
-          )}
 
           {/* Navigation Buttons */}
           <View className="gap-3 mt-4">

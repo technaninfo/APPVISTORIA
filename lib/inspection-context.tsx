@@ -60,10 +60,6 @@ export interface InspectionItem {
   status: "approved" | "rejected" | "na";
   photos: InspectionPhoto[];
   description: string;
-  technicalTest?: string;
-  technicalOpinion?: string;
-  classification?: "light" | "moderate" | "critical";
-  condition?: "new" | "good" | "regular" | "poor";
 }
 
 export interface InspectionState {
@@ -74,17 +70,6 @@ export interface InspectionState {
   items: InspectionItem[];
   createdAt: string;
   updatedAt: string;
-  technicalFinal?: {
-    generalOpinion?: string;
-    generalClassification?: "adequate" | "with_reservations" | "critical";
-    recommendations?: string;
-    artNumber?: string;
-  };
-  simpleSignature?: {
-    responsibleName?: string;
-    date?: string;
-    clientAware?: boolean;
-  };
 }
 
 export interface InspectionContextType {
@@ -95,8 +80,6 @@ export interface InspectionContextType {
   updateConditions: (data: Partial<InspectionConditions>) => void;
   addPhoto: (photo: InspectionPhoto) => void;
   updateItem: (itemId: string, data: Partial<InspectionItem>) => void;
-  updateTechnicalFinal: (data: Partial<InspectionState["technicalFinal"]>) => void;
-  updateSimpleSignature: (data: Partial<InspectionState["simpleSignature"]>) => void;
   reset: () => void;
 }
 
@@ -152,8 +135,6 @@ type Action =
   | { type: "UPDATE_CONDITIONS"; payload: Partial<InspectionConditions> }
   | { type: "ADD_PHOTO"; payload: InspectionPhoto }
   | { type: "UPDATE_ITEM"; payload: { itemId: string; data: Partial<InspectionItem> } }
-  | { type: "UPDATE_TECHNICAL_FINAL"; payload: Partial<InspectionState["technicalFinal"]> }
-  | { type: "UPDATE_SIMPLE_SIGNATURE"; payload: Partial<InspectionState["simpleSignature"]> }
   | { type: "RESET" };
 
 function inspectionReducer(state: InspectionState, action: Action): InspectionState {
@@ -198,18 +179,6 @@ function inspectionReducer(state: InspectionState, action: Action): InspectionSt
         ),
         updatedAt: new Date().toISOString(),
       };
-    case "UPDATE_TECHNICAL_FINAL":
-      return {
-        ...state,
-        technicalFinal: { ...state.technicalFinal, ...action.payload },
-        updatedAt: new Date().toISOString(),
-      };
-    case "UPDATE_SIMPLE_SIGNATURE":
-      return {
-        ...state,
-        simpleSignature: { ...state.simpleSignature, ...action.payload },
-        updatedAt: new Date().toISOString(),
-      };
     case "RESET":
       return { ...defaultState, createdAt: new Date().toISOString() };
     default:
@@ -230,8 +199,6 @@ export function InspectionProvider({ children }: { children: React.ReactNode }) 
     updateConditions: (data) => dispatch({ type: "UPDATE_CONDITIONS", payload: data }),
     addPhoto: (photo) => dispatch({ type: "ADD_PHOTO", payload: photo }),
     updateItem: (itemId, data) => dispatch({ type: "UPDATE_ITEM", payload: { itemId, data } }),
-    updateTechnicalFinal: (data) => dispatch({ type: "UPDATE_TECHNICAL_FINAL", payload: data }),
-    updateSimpleSignature: (data) => dispatch({ type: "UPDATE_SIMPLE_SIGNATURE", payload: data }),
     reset: () => dispatch({ type: "RESET" }),
   };
 
