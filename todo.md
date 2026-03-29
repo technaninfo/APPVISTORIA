@@ -150,3 +150,56 @@
 ## Correções Urgentes (Novo)
 - [x] Transformar UF em Picker/Select com lista de estados (RJ, SP, MG, etc)
 - [x] Investigar por que não aparece nada após clicar em "Próximo" na tela de dados
+
+
+## AUDITORIA E FINALIZAÇÃO (Novo)
+
+### Fase 1: Corrigir Vistoria Técnica (PRIORIDADE MÁXIMA)
+- [ ] ETAPA 3: Implementar campos para cada item:
+  - [ ] Status (Aprovado/Reprovado/NA)
+  - [ ] Campo "Teste técnico"
+  - [ ] Campo "Parecer técnico"
+  - [ ] Classificação (Leve/Moderado/Crítico) - APENAS quando Reprovado
+- [ ] Adicionar itens técnicos adicionais:
+  - [ ] Fissuras/trincas/rachaduras
+  - [ ] Som cavo em revestimentos
+  - [ ] Desnível de piso
+  - [ ] Caimento
+  - [ ] Vedação de esquadrias
+  - [ ] Testes elétricos (tomadas e interruptores)
+  - [ ] Testes hidráulicos (pressão e escoamento)
+  - [ ] Sinais de infiltração e umidade
+- [ ] ETAPA 4: Implementar campos finais:
+  - [ ] Parecer técnico geral
+  - [ ] Classificação geral (Adequado/Com ressalvas/Crítico)
+  - [ ] Recomendações técnicas
+  - [ ] Dados do responsável técnico (Nome, CREA/CAU, UF, Número ART/RRT)
+
+### Fase 2: Validar Vistoria Simples
+- [ ] Verificar se está igual à vistoria de entrega de chaves
+- [ ] Garantir que NÃO tem: CREA, ART, parecer técnico, classificação de risco
+- [ ] Validar campos finais: responsável pela vistoria, data, cliente ciente
+
+### Fase 3: Validar Vistoria para Locação
+- [ ] ETAPA 3: Implementar campos para cada item:
+  - [ ] Status (Aprovado/Reprovado/NA)
+  - [ ] Estado (Novo/Bom/Regular/Ruim)
+  - [ ] Campo "Descrição"
+  - [ ] Foto (obrigatória)
+- [ ] Remover qualquer linguagem técnica, parecer técnico, classificação leve/moderado/crítico
+
+### Fase 4: Funcionalidades (NÃO PODE QUEBRAR)
+- [ ] Testar geração de PDF
+- [ ] Testar envio por WhatsApp
+- [ ] Testar envio por e-mail
+- [ ] Testar armazenamento local
+- [ ] Testar exportação de imagens
+
+### Fase 5: Preparar para APK Android
+- [ ] Verificar permissões Android (câmera, armazenamento, mídia)
+- [ ] Testar geração de PDF no Android
+- [ ] Testar compartilhamento (WhatsApp e e-mail)
+- [ ] Testar salvamento de arquivos no dispositivo
+- [ ] Garantir compatibilidade com build Android
+- [ ] Corrigir dependências que possam quebrar o build
+- [ ] Ajustar configurações necessárias
