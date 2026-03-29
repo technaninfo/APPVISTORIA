@@ -32,7 +32,7 @@ export function sanitizeName(name: string): string {
  * Cria o nome da pasta para a vistoria
  */
 export function generateFolderName(type: string, clientName: string, date: string): string {
-  const typeLabel = type === "technical" ? "tecnica" : "entrega";
+  const typeLabel = type === "technical" ? "tecnica" : type === "rental" ? "locacao" : "simples";
   const sanitizedClient = sanitizeName(clientName);
   return `vistoria_${typeLabel}_${sanitizedClient}_${date}`;
 }

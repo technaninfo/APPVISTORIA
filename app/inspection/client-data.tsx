@@ -39,7 +39,7 @@ export default function ClientDataScreen() {
     }
     setShowToast(true);
     setTimeout(() => {
-      router.push("../inspection/conditions");
+      router.push("./conditions");
     }, 500);
   };
 
@@ -110,9 +110,9 @@ export default function ClientDataScreen() {
               <View className="flex-0.25">
                 <StateSelect
                   label="UF"
-                  value={state.client.address.state || "SP"}
+                  value={state.client.address.state}
                   onValueChange={(text) => updateClient({ address: { ...state.client.address, state: text } })}
-                  placeholder="SP"
+                  placeholder="Selecione"
                 />
               </View>
             </View>
@@ -198,9 +198,9 @@ export default function ClientDataScreen() {
               <View className="flex-0.25">
                 <StateSelect
                   label="UF"
-                  value={state.vistoriador.address.state || "SP"}
+                  value={state.vistoriador.address.state}
                   onValueChange={(text) => updateVistoriador({ address: { ...state.vistoriador.address, state: text } })}
-                  placeholder="SP"
+                  placeholder="Selecione"
                 />
               </View>
             </View>
